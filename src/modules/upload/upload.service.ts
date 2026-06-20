@@ -3,6 +3,7 @@ import {
   PutObjectCommand,
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
+import sharp from "sharp";
 
 if (!process.env.R2_PUBLIC_URL) {
   console.log("Please provide your r2 bucket public url");
@@ -14,26 +15,24 @@ class UploadService {
   constructor() {
     this.client = new S3Client({
       region: "auto",
-      endpoint: process.env.R2_ENDPOINT,
+      endpoint: process.env.R2_ENDPOINT!,
       credentials: {
-        accessKeyId: process.env.R2_ACCESS_KEY,
-        secretAccessKey: process.env.R2_SECRET_KEY,
+        accessKeyId: process.env.R2_ACCESS_KEY!,
+        secretAccessKey: process.env.R2_SECRET_KEY!,
       },
     });
   }
 
-  async convertToWebp(file: File) {
-    // convert images to webp here
+  async convertToWebp(fileBuffer: Buffer): Promise<Buffer> {
+    return await sharp(fileBuffer).webp({ quality: 80}).toBuffer();
   }
 
-  async uploadFile({ file, key }: { file: File; key: string }) {
-    let fileBuffer;
+  async uploadImageFile({ file, key }: { file: File; key: string }) {
+    const arrayBuffer = await file.arrayBuffer();
+    let fileBuffer: Buffer = Buffer.from(arrayBuffer);
 
-    if (file.type === "image/webp") {
-      const arrayBuffer = await file.arrayBuffer();
-      fileBuffer = Buffer.from(arrayBuffer);
-    } else {
-      fileBuffer = await this.convertToWebp(file);
+    if (file.type !== "image/webp") {
+      fileBuffer = await this.convertToWebp(fileBuffer);
     }
 
     await this.client.send(
@@ -41,7 +40,7 @@ class UploadService {
         Bucket: process.env.R2_BUCKET,
         Key: key,
         Body: fileBuffer,
-        ContentType: type,
+        ContentType: "image/webp",
       }),
     );
 

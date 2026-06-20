@@ -62,7 +62,7 @@ export const addProductAction = async (
   const authorAvatar = user.imageUrl || "/images/default-avatar.webp";
 
   const productId = crypto.randomUUID();
-  const imageUrl = await uploadService.uploadFile({
+  const imageUrl = await uploadService.uploadImageFile({
     file: image,
     key: `${productId}-image.webp`,
   });
