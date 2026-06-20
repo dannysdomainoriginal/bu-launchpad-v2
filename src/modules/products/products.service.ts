@@ -1,8 +1,9 @@
 import { db } from "@/lib/db";
 import { ourProductsDb } from "@/lib/db/products";
 import { InsertProductType, products } from "@/lib/db/schemas/products";
-import { productTags } from "@/lib/db/schemas/productTags";
-import { cacheTag } from "next/cache";
+import { productTags } from "@/lib/db/schema";
+import { desc, eq } from "drizzle-orm";
+import { cacheTag, refresh, revalidateTag } from "next/cache";
 import { cacheLife } from "next/cache";
 
 /* -------------------------------------------------------------------------- */
@@ -11,29 +12,23 @@ import { cacheLife } from "next/cache";
 export async function getFeaturedProducts() {
   "use cache";
   cacheLife("hours");
+  cacheTag("featured-products");
 
-  const result = await db.query.products
-    .findMany({
-      where: (products, { eq }) => eq(products.isApproved, true),
-      orderBy: (products, { desc }) => [
-        desc(products.isFeatured), // 1. Prioritize rows where isFeatured is true
-        desc(products.voteCount), // 2. Break ties or top-off sorting using voteCount
-      ],
-      limit: 6,
-      with: {
-        tags: {
-          columns: {
-            name: true, // Only fetch the tag string name, skip IDs
-          },
+  return await db.query.products.findMany({
+    where: (products, { eq }) => eq(products.isApproved, true),
+    orderBy: (products, { desc }) => [
+      desc(products.isFeatured), // 1. Prioritize rows where isFeatured is true
+      desc(products.voteCount), // 2. Break ties or top-off sorting using voteCount
+    ],
+    limit: 6,
+    with: {
+      tags: {
+        columns: {
+          name: true, // Only fetch the tag string name, skip IDs
         },
       },
-    })
-    .catch(() => {});
-
-  return (
-    result ||
-    ourProductsDb.sort((a, b) => b.voteCount - a.voteCount).slice(0, 6)
-  );
+    },
+  });
 }
 
 /* -------------------------------------------------------------------------- */
@@ -42,28 +37,20 @@ export async function getFeaturedProducts() {
 export async function getRecentlyUploaded() {
   "use cache";
   cacheLife("hours");
+  cacheTag("recently-launched");
 
-  const result = await db.query.products
-    .findMany({
-      where: (products, { eq }) => eq(products.isApproved, true),
-      orderBy: (products, { desc }) => [desc(products.createdAt)],
-      limit: 9,
-      with: {
-        tags: {
-          columns: {
-            name: true,
-          },
+  return await db.query.products.findMany({
+    where: (products, { eq }) => eq(products.isApproved, true),
+    orderBy: (products, { desc }) => [desc(products.createdAt)],
+    limit: 9,
+    with: {
+      tags: {
+        columns: {
+          name: true,
         },
       },
-    })
-    .catch(() => {});
-
-  return (
-    result ||
-    ourProductsDb
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-      .slice(0, 9)
-  );
+    },
+  });
 }
 
 /* -------------------------------------------------------------------------- */
@@ -101,21 +88,62 @@ export async function insertNewProduct(
   productValues: ProductType,
   tags: string[],
 ) {
-  try {
-    await db.insert(products).values(productValues);
+  await db.insert(products).values(productValues);
 
-    if (tags.length) {
-      await db.insert(productTags).values(
-        tags.map((tag) => ({
-          productId: productValues.id,
-          name: tag,
-        })),
-      );
-    }
-
-    return { success: true } as const;
-  } catch (err: any) {
-    // properly intercept duplicate errors and pgsql errors and parse error messages to outside world
-    return { error: err.message as string } as const;
+  if (tags.length) {
+    await db.insert(productTags).values(
+      tags.map((tag) => ({
+        productId: productValues.id,
+        name: tag,
+      })),
+    );
   }
+
+  revalidateTag("products:list", "max");
+  revalidateTag("recently-launched", "max");
+}
+
+/* -------------------------------------------------------------------------- */
+/*                              APPROVE A PRODUCT                             */
+/* -------------------------------------------------------------------------- */
+export async function approveProduct(id: string) {
+  const [updatedProduct] = await db
+    .update(products)
+    .set({ isApproved: true })
+    .where(eq(products.id, id))
+    .returning();
+
+  if (!updatedProduct) {
+    throw new Error("PRODUCT_NOT_FOUND");
+  }
+
+  revalidateTag("products:list", "max");
+  revalidateTag("recently-launched", "max");
+  revalidateTag(`product:${updatedProduct.slug}`, "max");
+  refresh();
+}
+
+/* -------------------------------------------------------------------------- */
+/*                              GET ALL PRODUCTS                              */
+/* -------------------------------------------------------------------------- */
+type GetAllProductsParams = {
+  limit: number;
+  offset: number;
+};
+
+export async function getAllProducts({
+  limit = 50,
+  offset = 0,
+}: GetAllProductsParams) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("products:list");
+
+  // skip tags
+  return db
+    .select()
+    .from(products)
+    .orderBy(desc(products.createdAt))
+    .limit(limit)
+    .offset(offset);
 }

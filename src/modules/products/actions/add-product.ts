@@ -67,23 +67,24 @@ export const addProductAction = async (
     key: `${productId}-image.webp`,
   });
 
-  const { error } = await insertNewProduct(
-    {
-      ...product,
-      id: productId,
-      image: imageUrl.url,
-      authorAvatar,
-      authorName,
-      authorId: userId,
-      organizationId: orgId,
-    },
-    tags,
-  );
-
-  if (error) {
+  try {
+    await insertNewProduct(
+      {
+        ...product,
+        id: productId,
+        image: imageUrl.url,
+        authorAvatar,
+        authorName,
+        authorId: userId,
+        organizationId: orgId,
+      },
+      tags,
+    );
+  } catch (err: any) {
+    // handle errors accordingly
     return {
       success: false,
-      message: error,
+      message: "There was an error submitting your product",
     };
   }
 

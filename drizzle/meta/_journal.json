@@ -8,6 +8,13 @@
       "when": 1779717009896,
       "tag": "0000_free_queen_noir",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1781993174880,
+      "tag": "0001_stale_champions",
+      "breakpoints": true
     }
   ]
 }

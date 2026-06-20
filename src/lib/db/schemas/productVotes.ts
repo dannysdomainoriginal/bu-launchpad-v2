@@ -7,8 +7,8 @@ import {
 } from "drizzle-orm/pg-core";
 import { products } from "./products";
 
-export const votes = pgTable(
-  "votes",
+export const productVotes = pgTable(
+  "product_votes",
   {
     productId: uuid("product_id")
       .notNull()
