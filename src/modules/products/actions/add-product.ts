@@ -1,3 +1,5 @@
+"use server";
+
 import { auth, currentUser } from "@clerk/nextjs/server";
 
 import uploadService from "@/modules/upload/upload.service";

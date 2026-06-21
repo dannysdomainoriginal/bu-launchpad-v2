@@ -15,6 +15,7 @@ export const products = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     name: varchar("name", { length: 120 }).notNull(),
+    tagline: varchar("tagline", { length: 255 }).notNull(),
     slug: varchar("slug", { length: 140 }).notNull(),
     description: text("description").notNull(),
     isFeatured: boolean("is_featured").notNull().default(false),
@@ -49,4 +50,5 @@ export const products = pgTable(
 );
 
 export type ProductType = typeof products.$inferSelect;
+export type ProductWithTags = ProductType & { tags: { name: string }[] };
 export type InsertProductType = typeof products.$inferInsert;

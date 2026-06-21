@@ -1,5 +1,4 @@
 import { db } from "@/lib/db";
-import { ourProductsDb } from "@/lib/db/products";
 import { InsertProductType, products } from "@/lib/db/schemas/products";
 import { productTags } from "@/lib/db/schema";
 import { desc, eq } from "drizzle-orm";
@@ -58,9 +57,9 @@ export async function getRecentlyUploaded() {
 /* -------------------------------------------------------------------------- */
 export async function getProductBySlug(slug: string) {
   "use cache";
-  cacheTag(`product:${slug}`);
+  cacheTag(`product:single:${slug}`);
 
-  const result = await db.query.products
+  return await db.query.products
     .findFirst({
       where: (products, { eq, and }) =>
         and(eq(products.slug, slug), eq(products.isApproved, true)),
@@ -72,9 +71,6 @@ export async function getProductBySlug(slug: string) {
         },
       },
     })
-    .catch(() => {});
-
-  return result || ourProductsDb.find((product) => product.slug === slug);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -119,7 +115,7 @@ export async function approveProduct(id: string) {
 
   revalidateTag("products:list", "max");
   revalidateTag("recently-launched", "max");
-  revalidateTag(`product:${updatedProduct.slug}`, "max");
+  revalidateTag(`product:single:${updatedProduct.slug}`, "max");
   refresh();
 }
 
@@ -131,6 +127,7 @@ type GetAllProductsParams = {
   offset: number;
 };
 
+// used in admin page
 export async function getAllProducts({
   limit = 50,
   offset = 0,
@@ -146,4 +143,31 @@ export async function getAllProducts({
     .orderBy(desc(products.createdAt))
     .limit(limit)
     .offset(offset);
+}
+
+/* -------------------------------------------------------------------------- */
+/*                         GET ALL PRODUCTS WITH TAGS                         */
+/* -------------------------------------------------------------------------- */
+// used in explore page
+export async function getAllProductsWithTags({
+  limit = 50,
+  offset = 0,
+}: GetAllProductsParams) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("products:list:with-tags");
+
+  return await db.query.products.findMany({
+    where: (products, { eq }) => eq(products.isApproved, true),
+    orderBy: (products, { desc }) => [desc(products.createdAt)],
+    limit,
+    offset,
+    with: {
+      tags: {
+        columns: {
+          name: true,
+        },
+      },
+    },
+  });
 }

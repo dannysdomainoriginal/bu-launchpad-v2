@@ -15,6 +15,20 @@
       "when": 1781993174880,
       "tag": "0001_stale_champions",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782059613732,
+      "tag": "0002_fine_vapor",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1782060999166,
+      "tag": "0003_first_stark_industries",
+      "breakpoints": true
     }
   ]
 }

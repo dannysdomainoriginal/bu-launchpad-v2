@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explore Student Launches</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased">
+
+  <div class="max-w-6xl mx-auto px-4 py-12 sm:px-6 lg:px-8 space-y-12">
+    
+    <header class="space-y-3 text-center sm:text-left">
+      <h1 class="text-4xl font-extrabold tracking-tight text-slate-900">Explore Student Launches</h1>
+      <p class="text-lg text-slate-500 max-w-xl">Discover software, systems, and tools built by students to solve real campus problems.</p>
+    </header>
+
+    <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4 md:space-y-0 md:flex md:items-center md:justify-between md:gap-4">
+      
+      <div class="relative flex-1">
+        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">🔍</span>
+        <input
+          id="search-input"
+          type="text"
+          placeholder="Search products, taglines, or builders..."
+          class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
+        >
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="flex items-center space-x-2">
+          <select
+            id="tag-filter"
+            class="bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+          >
+            <option value="All Tags">All Tags</option>
+            <option value="Productivity">Productivity</option>
+            <option value="AI">AI</option>
+            <option value="Finance">Finance</option>
+            <option value="Housing/Life">Housing/Life</option>
+          </select>
+        </div>
+
+        <div class="bg-slate-100 p-1 rounded-xl flex items-center">
+          <button id="sort-trending" class="px-4 py-1.5 rounded-lg text-sm font-semibold transition-all bg-white text-indigo-600 shadow-sm cursor-pointer">
+            🔥 Trending
+          </button>
+          <button id="sort-recent" class="px-4 py-1.5 rounded-lg text-sm font-semibold transition-all text-slate-600 hover:text-slate-900 cursor-pointer">
+            ⏰ Newest
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="products-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></section>
+
+    <section id="empty-state" class="hidden text-center py-20 border-2 border-dashed border-slate-200 rounded-2xl bg-white max-w-xl mx-auto p-6">
+      <span class="text-4xl">🏜️</span>
+      <h3 class="text-lg font-bold text-slate-900 mt-4">No campus tools match your search</h3>
+      <p class="text-sm text-slate-500 mt-1 max-w-sm mx-auto">Try checking your spelling or removing filter tags.</p>
+      <button id="clear-filters-btn" class="mt-5 text-sm font-semibold text-indigo-600 hover:text-indigo-700 underline underline-offset-4 cursor-pointer">
+        Clear all filters
+      </button>
+    </section>
+
+  </div>
+
+  <script>
+    // In-memory mock product array
+    const PRODUCTS = [
+      { id: "1", name: "AI Study Assistant", tagline: "Never miss a lecture, assignment or deadline again.", thumbnail: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&auto=format&fit=crop&q=60", votes: 142, daysAgo: 2, tags: ["Productivity", "AI"], builder: "Charles Daniel", school: "Babcock University" },
+      { id: "2", name: "Campus Marketplace", tagline: "Buy and sell peer textbooks safely within campus walls.", thumbnail: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&auto=format&fit=crop&q=60", votes: 89, daysAgo: 1, tags: ["Finance", "Housing/Life"], builder: "Amina Yusuf", school: "University of Lagos" },
+      { id: "3", name: "RoomieMatch", tagline: "Find off-campus roommates who share your sleep schedule.", thumbnail: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&auto=format&fit=crop&q=60", votes: 210, daysAgo: 5, tags: ["Housing/Life"], builder: "Tunde Olatunji", school: "Babcock University" },
+      { id: "4", name: "GPA Calculator", tagline: "Map out your semester grades to see exactly what you need on final exams.", thumbnail: "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=400&auto=format&fit=crop&q=60", votes: 35, daysAgo: 0, tags: ["Productivity"], builder: "Sarah Jenkins", school: "Covenant University" }
+    ];
+
+    // Page State Trackers
+    let currentSearch = "";
+    let currentTag = "All Tags";
+    let currentSort = "trending";
+
+    // DOM References
+    const searchInput = document.getElementById('search-input');
+    const tagFilter = document.getElementById('tag-filter');
+    const btnSortTrending = document.getElementById('sort-trending');
+    const btnSortRecent = document.getElementById('sort-recent');
+    const productsGrid = document.getElementById('products-grid');
+    const emptyState = document.getElementById('empty-state');
+    const clearFiltersBtn = document.getElementById('clear-filters-btn');
+
+    // Debouncer Utility Implementation
+    function debounce(func, delay) {
+      let timeoutId;
+      return function (...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => func.apply(this, args), delay);
+      };
+    }
+
+    // Engine: Filter, Sort, and Render UI Items
+    function render() {
+      // 1. Filter logic
+      let processed = PRODUCTS.filter(p => {
+        const matchesSearch = p.name.toLowerCase().includes(currentSearch.toLowerCase()) || 
+                              p.tagline.toLowerCase().includes(currentSearch.toLowerCase()) ||
+                              p.builder.toLowerCase().includes(currentSearch.toLowerCase());
+        const matchesTag = currentTag === "All Tags" || p.tags.includes(currentTag);
+        return matchesSearch && matchesTag;
+      });
+
+      // 2. Sorting logic
+      if (currentSort === 'trending') {
+        processed.sort((a, b) => b.votes - a.votes);
+      } else {
+        processed.sort((a, b) => a.daysAgo - b.daysAgo);
+      }
+
+      // 3. Render HTML output states
+      if (processed.length === 0) {
+        productsGrid.innerHTML = "";
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      productsGrid.innerHTML = processed.map(p => `
+        <article class="bg-white border border-slate-200/60 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 flex flex-col group cursor-pointer">
+          <div class="aspect-[16/10] w-full bg-slate-100 relative overflow-hidden">
+            <img src="${p.thumbnail}" alt="${p.name}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]">
+            <div class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-lg text-xs font-bold text-slate-800 shadow-sm border border-slate-100 flex items-center space-x-1">
+              <span>▲</span><span>${p.votes}</span>
+            </div>
+          </div>
+          <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
+            <div class="space-y-2">
+              <div class="flex flex-wrap gap-1">
+                ${p.tags.map(t => `<span class="text-[10px] tracking-wide font-bold uppercase bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">${t}</span>`).join('')}
+              </div>
+              <h3 class="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">${p.name}</h3>
+              <p class="text-sm text-slate-600 line-clamp-2 leading-relaxed">${p.tagline}</p>
+            </div>
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+              <div>
+                <p class="font-semibold text-slate-700">By ${p.builder}</p>
+                <p class="text-[11px] text-indigo-500 font-medium">${p.school}</p>
+              </div>
+              <span class="italic">${p.daysAgo === 0 ? 'Today' : p.daysAgo + 'd ago'}</span>
+            </div>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    // Attach Event Listeners
+    // Attaching Debouncer on Keyup Input Event
+    searchInput.addEventListener('input', debounce((e) => {
+      currentSearch = e.target.value;
+      render();
+    }, 300));
+
+    tagFilter.addEventListener('change', (e) => {
+      currentTag = e.target.value;
+      render();
+    });
+
+    btnSortTrending.addEventListener('click', () => {
+      currentSort = 'trending';
+      btnSortTrending.className = "px-4 py-1.5 rounded-lg text-sm font-semibold transition-all bg-white text-indigo-600 shadow-sm cursor-pointer";
+      btnSortRecent.className = "px-4 py-1.5 rounded-lg text-sm font-semibold transition-all text-slate-600 hover:text-slate-900 cursor-pointer";
+      render();
+    });
+
+    btnSortRecent.addEventListener('click', () => {
+      currentSort = 'recent';
+      btnSortRecent.className = "px-4 py-1.5 rounded-lg text-sm font-semibold transition-all bg-white text-indigo-600 shadow-sm cursor-pointer";
+      btnSortTrending.className = "px-4 py-1.5 rounded-lg text-sm font-semibold transition-all text-slate-600 hover:text-slate-900 cursor-pointer";
+      render();
+    });
+
+    clearFiltersBtn.addEventListener('click', () => {
+      currentSearch = "";
+      currentTag = "All Tags";
+      searchInput.value = "";
+      tagFilter.value = "All Tags";
+      render();
+    });
+
+    // Initial Load Layout execution
+    render();
+  </script>
+</body>
+</html>

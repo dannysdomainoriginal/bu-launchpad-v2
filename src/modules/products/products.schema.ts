@@ -78,6 +78,11 @@ export const createProductServerParseSchema = z.object({
     .string()
     .min(1, "Product name is required")
     .max(250, "Product name is too long, max of 250 characters"),
+  
+  tagline: z
+    .string()
+    .min(1, "Product tagline is required")
+    .max(250, "Product tagline is too long, max of 250 characters"),
 
   slug: z
     .string()

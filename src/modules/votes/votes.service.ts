@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { productVotes } from "@/lib/db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 interface AddOrRemoveVoteParams {
   userId: string;
@@ -10,7 +10,7 @@ interface AddOrRemoveVoteParams {
 /* -------------------------------------------------------------------------- */
 /*                                  ADD VOTE                                  */
 /* -------------------------------------------------------------------------- */
-export async function addVote({ userId, productId }: AddOrRemoveVoteParams) {
+export async function addVote({ productId, userId }: AddOrRemoveVoteParams) {
   return db
     .insert(productVotes)
     .values({ productId, userId })
@@ -20,7 +20,7 @@ export async function addVote({ userId, productId }: AddOrRemoveVoteParams) {
 /* -------------------------------------------------------------------------- */
 /*                                 REMOVE VOTE                                */
 /* -------------------------------------------------------------------------- */
-export async function removeVote({ userId, productId }: AddOrRemoveVoteParams) {
+export async function removeVote({ productId, userId }: AddOrRemoveVoteParams) {
   const { rowCount } = await db
     .delete(productVotes)
     .where(
@@ -33,4 +33,19 @@ export async function removeVote({ userId, productId }: AddOrRemoveVoteParams) {
   if (!rowCount) {
     throw new Error("PRODUCT_VOTE_NOT_FOUND");
   }
+}
+
+/* -------------------------------------------------------------------------- */
+/*                              CHECK VOTE STATUS                             */
+/* -------------------------------------------------------------------------- */
+export async function checkVoteStatus(productId: string, userId: string) {
+  const result = await db.execute(sql`
+    SELECT EXISTS (
+      SELECT 1 FROM product_votes
+      WHERE product_id = ${productId}
+      AND user_id = ${userId}
+    )  
+  `);
+
+  return Boolean(result.rows[0]?.exists);
 }
