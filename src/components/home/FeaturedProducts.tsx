@@ -21,6 +21,7 @@ export default async function FeaturedProducts() {
             Icon={StarIcon}
             description="Top picks from our community this week"
           />
+          
           <Button
             asChild
             variant="outline"
