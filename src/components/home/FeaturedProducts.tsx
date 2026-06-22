@@ -42,7 +42,7 @@ export default async function FeaturedProducts() {
           </div>
         ) : (
           <EmptySlate
-            message="No products launched in the last week. Check back soon for new launches"
+            message="No featured projects available right now. Check back soon."
             Icon={StarIcon}
           />
         )}

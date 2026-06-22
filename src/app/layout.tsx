@@ -43,9 +43,9 @@ export default function RootLayout({
         lang="en"
         className={`${manrope.variable} ${instrumentSans.variable} h-full antialiased`}
       >
-        <body className="min-h-full flex flex-col">
+        <body className="min-h-screen flex flex-col">
           <Header />
-          {children}
+          <div className="flex-1">{children}</div>
           <Footer />
         </body>
       </html>

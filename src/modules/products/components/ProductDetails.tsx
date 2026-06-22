@@ -37,22 +37,38 @@ export default async function ProductDetails({ params }: Props) {
             ))}
           </div>
           <h1 className="text-2xl sm:text-3xl font-semibold">{product.name}</h1>
-          <p className="text-base text-accent-foreground">
-            {product.tagline}
-          </p>
+          <p className="text-base text-accent-foreground">{product.tagline}</p>
           <span className="text-sm text-muted-foreground">
-            Built by {product.authorName} • Uploaded at{" "}
+            Built by {product.authorName} • Uploaded{" "}
             <RelativeTime date={product.createdAt} />
           </span>
         </div>
 
         {/* ACTIONS COMPONENT */}
         <div className="bg-accent p-5 border-2 rounded-2xl border-accent-foreground">
-          <p className="text-accent-foreground">🔥 {product.voteCount} students support this</p>
+          <p className="text-accent-foreground">
+            🔥 {product.voteCount} students support this
+          </p>
         </div>
       </div>
-      <div className="relative w-7xl h-180">
-        <Image alt={product.name} src={product.image} fill />
+      <div className="flex max-w-100">
+        <div>
+          <div className="relative w-7xl h-180">
+            <Image alt={product.name} src={product.image} fill />
+          </div>
+        </div>
+
+        {/* Builder Box */}
+        <div>
+          <Image
+            alt={product.authorName}
+            src={product.authorAvatar}
+            width={100}
+            height={100}
+            className="rounded-full"
+          />
+          <p className="text-sm text-accent-foreground">{product.authorName}</p>
+        </div>
       </div>
     </div>
   );
