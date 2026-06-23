@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { InsertProductType, products } from "@/lib/db/schemas/products";
 import { productTags } from "@/lib/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { cacheTag, refresh, revalidateTag } from "next/cache";
 import { cacheLife } from "next/cache";
 
@@ -59,18 +59,17 @@ export async function getProductBySlug(slug: string) {
   "use cache";
   cacheTag(`product:single:${slug}`);
 
-  return await db.query.products
-    .findFirst({
-      where: (products, { eq, and }) =>
-        and(eq(products.slug, slug), eq(products.isApproved, true)),
-      with: {
-        tags: {
-          columns: {
-            name: true,
-          },
+  return await db.query.products.findFirst({
+    where: (products, { eq, and }) =>
+      and(eq(products.slug, slug), eq(products.isApproved, true)),
+    with: {
+      tags: {
+        columns: {
+          name: true,
         },
       },
-    })
+    },
+  });
 }
 
 /* -------------------------------------------------------------------------- */
@@ -162,6 +161,66 @@ export async function getAllProductsWithTags({
     orderBy: (products, { desc }) => [desc(products.createdAt)],
     limit,
     offset,
+    with: {
+      tags: {
+        columns: {
+          name: true,
+        },
+      },
+    },
+  });
+}
+
+/* -------------------------------------------------------------------------- */
+/*                 GET SIMILAR PRODUCTS USING AN ARRAY OF TAGS                */
+/* -------------------------------------------------------------------------- */
+type SimilarProductIdRow = {
+  id: string;
+};
+
+export async function getSimilarProducts(
+  productId: string,
+  tags: string[],
+) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(`product:similar:${productId}`);
+  
+  if (!tags.length) {
+    return [];
+  }
+
+  const result = await db.execute<SimilarProductIdRow>(sql`
+    SELECT
+      p.id
+    FROM products p
+    JOIN product_tags pt
+      ON p.id = pt.product_id
+    WHERE pt.name IN (${sql.join(
+      tags.map((tag) => sql`${tag}`),
+      sql`, `,
+    )})
+      AND p.id != ${productId}
+      AND p.is_approved = true
+    GROUP BY p.id
+    ORDER BY
+      COUNT(pt.name) DESC,
+      p.vote_count DESC
+    LIMIT 3
+  `);
+
+  const productIds = result.rows.map((row) => row.id);
+
+  if (!productIds.length) {
+    return [];
+  }
+
+  return db.query.products.findMany({
+    where: (products, { and, inArray, eq }) =>
+      and(
+        inArray(products.id, productIds),
+        eq(products.isApproved, true),
+      ),
     with: {
       tags: {
         columns: {

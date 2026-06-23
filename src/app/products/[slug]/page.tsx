@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import {
-  ProductDetails,
+  ProductDetailsWrapper,
   ProductDetailsSkeleton,
 } from "@/modules/products/products.component";
 
@@ -11,9 +11,9 @@ type Props = {
 
 export default function ProductDetailsPage({ params }: Props) {
   return (
-    <main className="pb-10 md:pb-20 pt-15 px-4 sm:px-6 lg:px-8">
+    <main className="pb-8 sm:pb-10 pt-15 px-4 sm:px-6 lg:px-8 wrapper">
       <Suspense fallback={<ProductDetailsSkeleton />}>
-        <ProductDetails params={params} />
+        <ProductDetailsWrapper params={params} />
       </Suspense>
     </main>
   );
