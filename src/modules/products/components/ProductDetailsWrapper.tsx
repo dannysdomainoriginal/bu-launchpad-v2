@@ -28,7 +28,7 @@ export default async function ProductDetailsWrapper({ params }: Props) {
 
       {/* Similar Products */}
       <section className="py-6 md:py-10">
-        <h3 className="text-xl">People also viewed</h3>
+        <h3 className="text-xl">You may also like</h3>
         <Suspense fallback={<ProductsGridSkeleton count={3} />}>
           <SimilarProductsGrid product={product} tags={tags} />
         </Suspense>

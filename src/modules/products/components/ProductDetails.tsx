@@ -1,10 +1,14 @@
+import Image from "next/image";
+import { Suspense } from "react";
 import { ArrowUpRight, Users } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RelativeTime } from "@/components/ui/RelativeTime";
-import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { ProductWithTags } from "@/lib/db/schema";
+
+import { ProductVoteButtonWrapper } from "@/modules/votes/votes.component";
 
 type Props = {
   product: ProductWithTags;
@@ -12,7 +16,6 @@ type Props = {
 };
 
 export default function ProductDetails({ product, tags }: Props) {
-  
   return (
     <div>
       {/* HEADER */}
@@ -56,20 +59,28 @@ export default function ProductDetails({ product, tags }: Props) {
               </span>
             </div>
 
-            <Button className="w-full py-5" asChild>
-              <a
-                href={product.liveUrl ?? "#"}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Visit Project
-                <ArrowUpRight />
-              </a>
-            </Button>
+            {product.liveUrl && (
+              <Button className="w-full py-5" asChild>
+                <a
+                  href={product.liveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Visit Project
+                  <ArrowUpRight />
+                </a>
+              </Button>
+            )}
 
-            <Button variant="outline" className="w-full py-5">
-              Upvote
-            </Button>
+            <Suspense
+              fallback={
+                <Button variant="outline" className="w-full py-5">
+                  Loading...
+                </Button>
+              }
+            >
+              <ProductVoteButtonWrapper productId={product.id} />
+            </Suspense>
           </div>
         </Card>
       </div>

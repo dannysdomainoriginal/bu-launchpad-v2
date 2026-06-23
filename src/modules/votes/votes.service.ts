@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { productVotes } from "@/lib/db/schema";
 import { and, eq, sql } from "drizzle-orm";
+import { refresh, revalidatePath } from "next/cache";
 
 interface AddOrRemoveVoteParams {
   userId: string;
@@ -11,10 +12,12 @@ interface AddOrRemoveVoteParams {
 /*                                  ADD VOTE                                  */
 /* -------------------------------------------------------------------------- */
 export async function addVote({ productId, userId }: AddOrRemoveVoteParams) {
-  return db
+  await db
     .insert(productVotes)
     .values({ productId, userId })
     .onConflictDoNothing();
+
+  refresh();
 }
 
 /* -------------------------------------------------------------------------- */
@@ -33,6 +36,8 @@ export async function removeVote({ productId, userId }: AddOrRemoveVoteParams) {
   if (!rowCount) {
     throw new Error("PRODUCT_VOTE_NOT_FOUND");
   }
+
+  refresh();
 }
 
 /* -------------------------------------------------------------------------- */
