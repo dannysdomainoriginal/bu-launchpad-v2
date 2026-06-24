@@ -1,5 +1,3 @@
-"use cache";
-
 import { notFound } from "next/navigation";
 
 import { getProductBySlug } from "../products.service";
@@ -34,5 +32,5 @@ export default async function ProductDetailsWrapper({ params }: Props) {
         </Suspense>
       </section>
     </>
-  )
+  );
 }

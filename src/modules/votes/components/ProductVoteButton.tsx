@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { CheckCircle, StarIcon } from "lucide-react";
 import { useTransition } from "react";
-import { addVote } from "../votes.service";
+import { addVote, removeVote } from "../votes.service";
 
 interface Props {
   hasVoted: boolean;
@@ -33,7 +33,7 @@ export default function ProductVoteButton({
   const handleRemoveVote = () => {
     startTransition(async () => {
       try {
-        await addVote({ productId, userId });
+        await removeVote({ productId, userId });
         window.alert("You removed your vote for this innovation");
       } catch (err) {
         window.alert("Error removing your vote");

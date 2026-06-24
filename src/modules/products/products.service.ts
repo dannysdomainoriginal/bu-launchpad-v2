@@ -59,7 +59,7 @@ export async function getProductBySlug(slug: string) {
   "use cache";
   cacheTag(`product:single:${slug}`);
 
-  return await db.query.products.findFirst({
+  const product = await db.query.products.findFirst({
     where: (products, { eq, and }) =>
       and(eq(products.slug, slug), eq(products.isApproved, true)),
     with: {
@@ -70,6 +70,12 @@ export async function getProductBySlug(slug: string) {
       },
     },
   });
+
+  if (product) {
+    cacheTag(`product:by-id:${product.id}`);
+  }
+  
+  return product;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -178,14 +184,11 @@ type SimilarProductIdRow = {
   id: string;
 };
 
-export async function getSimilarProducts(
-  productId: string,
-  tags: string[],
-) {
+export async function getSimilarProducts(productId: string, tags: string[]) {
   "use cache";
   cacheLife("hours");
   cacheTag(`product:similar:${productId}`);
-  
+
   if (!tags.length) {
     return [];
   }
@@ -217,10 +220,7 @@ export async function getSimilarProducts(
 
   return db.query.products.findMany({
     where: (products, { and, inArray, eq }) =>
-      and(
-        inArray(products.id, productIds),
-        eq(products.isApproved, true),
-      ),
+      and(inArray(products.id, productIds), eq(products.isApproved, true)),
     with: {
       tags: {
         columns: {

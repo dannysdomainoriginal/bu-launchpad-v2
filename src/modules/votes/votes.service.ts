@@ -1,7 +1,7 @@
-"use server"
+"use server";
 
 import { and, eq, sql } from "drizzle-orm";
-import { refresh, revalidatePath } from "next/cache";
+import { refresh, revalidateTag } from "next/cache";
 
 import { db } from "@/lib/db";
 import { productVotes } from "@/lib/db/schema";
@@ -20,6 +20,7 @@ export async function addVote({ productId, userId }: AddOrRemoveVoteParams) {
     .values({ productId, userId })
     .onConflictDoNothing();
 
+  revalidateTag(`product:by-id:${productId}`, "max");
   refresh();
 }
 
@@ -40,6 +41,7 @@ export async function removeVote({ productId, userId }: AddOrRemoveVoteParams) {
     throw new Error("PRODUCT_VOTE_NOT_FOUND");
   }
 
+  revalidateTag(`product:by-id:${productId}`, "max");
   refresh();
 }
 

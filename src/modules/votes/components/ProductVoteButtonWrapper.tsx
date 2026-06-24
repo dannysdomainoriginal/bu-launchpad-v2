@@ -1,8 +1,8 @@
-import { Button } from "@/components/ui/button";
-import { currentUser, auth } from "@clerk/nextjs/server";
-import React from "react";
-import { checkVoteStatus } from "../votes.service";
+import { auth } from "@clerk/nextjs/server";
 import { SignUpButton } from "@clerk/nextjs";
+
+import { Button } from "@/components/ui/button";
+import { checkVoteStatus } from "../votes.service";
 import ProductVoteButton from "./ProductVoteButton";
 
 interface Props {
