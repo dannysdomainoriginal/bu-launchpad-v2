@@ -128,8 +128,8 @@ export async function approveProduct(id: string) {
 /*                              GET ALL PRODUCTS                              */
 /* -------------------------------------------------------------------------- */
 type GetAllProductsParams = {
-  limit: number;
-  offset: number;
+  limit?: number;
+  offset?: number;
 };
 
 // used in admin page
