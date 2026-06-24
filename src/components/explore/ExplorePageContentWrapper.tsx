@@ -4,7 +4,7 @@ import ExplorePageContent from "./ExplorePageContent";
 import { getAllProductsWithTags } from "@/modules/products/products.service";
 
 type Props = {
-  searchParams: { page: string };
+  searchParams: Promise<Record<string, string>>;
 };
 
 const PAGE_SIZE = 9;
@@ -12,11 +12,14 @@ const PAGE_SIZE = 9;
 export default async function ExplorePageContentWrapper({
   searchParams,
 }: Props) {
-  const page = Number(searchParams.page ?? 1);
-  const products = await getAllProductsWithTags({
-    limit: PAGE_SIZE,
-    offset: (page - 1) * PAGE_SIZE,
-  });
+  // * adding search feature
+  // const page = Number((await searchParams).page ?? 1);
+  // const products = await getAllProductsWithTags({
+  //   limit: PAGE_SIZE,
+  //   offset: (page - 1) * PAGE_SIZE,
+  // });
+
+  const products = await getAllProductsWithTags({});
 
   return <ExplorePageContent products={products} />;
 }
