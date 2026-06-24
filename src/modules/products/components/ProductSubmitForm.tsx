@@ -1,15 +1,21 @@
 "use client";
 
-import React, { useActionState, useEffect, useRef } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { SparklesIcon } from "lucide-react";
+
 import ProductFormField from "./ProductFormField";
 import ProductImageUpload from "./ProductImageUploader";
 import TagInput from "./TagInput";
+
 import { Button } from "@/components/ui/button";
-import { Loader2Icon, SparklesIcon } from "lucide-react";
 import { addProductAction } from "../actions";
-import { createProductFormSchema, CreateProductFormSchemaType } from "../products.schema";
+
+import {
+  createProductFormSchema,
+  CreateProductFormSchemaType,
+} from "../products.schema";
 
 const slugify = (value: string) =>
   value
@@ -22,74 +28,67 @@ const slugify = (value: string) =>
     .replace(/-+/g, "-")
     .replace(/^-+|-+$/g, "");
 
-const initialState = {
-  success: false,
-  errors: {},
-  message: "",
-};
-
 export default function ProductSubmitForm() {
-  const formRef = useRef<HTMLFormElement>(null);
-  const [state, formAction, isPending] = useActionState(
-    addProductAction,
-    initialState,
+  const [state, setState] = useState<{ success?: boolean; message?: string }>(
+    {},
   );
 
-  const { control, handleSubmit, reset, setValue, watch } =
-    useForm<CreateProductFormSchemaType>({
-      resolver: zodResolver(createProductFormSchema) as any,
-      defaultValues: {
-        name: "",
-        slug: "",
-        description: "",
-        liveUrl: undefined,
-        tags: [],
-        image: undefined,
-      },
-      mode: "onBlur",
-    });
+  const {
+    control,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { isSubmitting },
+  } = useForm<CreateProductFormSchemaType>({
+    resolver: zodResolver(createProductFormSchema) as any,
+    defaultValues: {
+      name: "",
+      tagline: "",
+      description: "",
+      liveUrl: "",
+      tags: [],
+      image: undefined,
+    },
+    mode: "onBlur",
+  });
 
   const nameValue = watch("name");
+  const slugValue = slugify(nameValue);
 
-  useEffect(() => {
-    setValue("slug", slugify(nameValue || ""), {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
-  }, [nameValue, setValue]);
+  const onSubmit: SubmitHandler<CreateProductFormSchemaType> = async (data) => {
+    try {
+      const serverResponse = await addProductAction({
+        ...data,
+        slug: slugValue,
+      });
 
-  useEffect(() => {
-    if (state.success) {
-      reset({
-        name: "",
-        slug: "",
-        description: "",
-        liveUrl: undefined,
-        tags: [],
-        image: undefined,
+      setState(serverResponse);
+
+      if (serverResponse.success) {
+        reset({
+          name: "",
+          description: "",
+          liveUrl: undefined,
+          tags: [],
+          image: undefined,
+        });
+      }
+    } catch (err: any) {
+      setState({
+        success: false,
+        message: "There was an error submitting your product",
       });
     }
-  }, [reset, state.success]);
-
-  const onSubmit = async () => {
-    if (!formRef.current) return;
-    const formData = new FormData(formRef.current);
-    await formAction(formData);
   };
 
   return (
-    <form
-      ref={formRef}
-      onSubmit={handleSubmit(onSubmit)}
-      className="space-y-8"
-      noValidate
-    >
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8" noValidate>
       {state.message ? (
         <div
           className={
             state.success
-              ? "rounded-3xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-900"
-              : "rounded-3xl border border-destructive-500/20 bg-destructive-500/10 p-4 text-sm text-destructive-900"
+              ? "rounded-3xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-500/80"
+              : "rounded-3xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-500/80"
           }
           aria-live="polite"
         >
@@ -115,20 +114,31 @@ export default function ProductSubmitForm() {
       />
 
       <Controller
-        name="slug"
+        name="tagline"
         control={control}
         render={({ field, fieldState }) => (
           <ProductFormField
-            label="Slug"
+            label="Tagline"
             name={field.name}
-            id="slug"
-            placeholder="my-awesome-product"
+            id="tagline"
+            placeholder="A brief, catchy description of your innovation"
             required
             value={field.value}
-            readOnly
-            helperText="Automatically generated from the product name"
+            onChange={field.onChange}
+            error={fieldState.error?.message}
           />
         )}
+      />
+
+      <ProductFormField
+        label="Slug"
+        name="slug"
+        id="slug"
+        placeholder="my-awesome-product"
+        required
+        value={slugValue}
+        readOnly
+        helperText="Automatically generated from the product name"
       />
 
       <Controller
@@ -199,11 +209,14 @@ export default function ProductSubmitForm() {
         <Button
           type="submit"
           size="lg"
-          className="w-full rounded-none py-6"
-          disabled={isPending}
+          className="w-full rounded-none py-6 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={isSubmitting}
         >
-          {isPending ? (
-            <Loader2Icon className="size-4 animate-spin" />
+          {isSubmitting ? (
+            <>
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              Submitting...
+            </>
           ) : (
             <>
               <SparklesIcon className="size-4" />

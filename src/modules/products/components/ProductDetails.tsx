@@ -72,6 +72,7 @@ export default function ProductDetails({ product, tags }: Props) {
               </Button>
             )}
 
+            {/* Vote Button */}
             <Suspense
               fallback={
                 <Button variant="outline" className="w-full py-5">

@@ -1,7 +1,10 @@
-import { db } from "@/lib/db";
-import { productVotes } from "@/lib/db/schema";
+"use server"
+
 import { and, eq, sql } from "drizzle-orm";
 import { refresh, revalidatePath } from "next/cache";
+
+import { db } from "@/lib/db";
+import { productVotes } from "@/lib/db/schema";
 
 interface AddOrRemoveVoteParams {
   userId: string;

@@ -33,13 +33,10 @@ export const createProductFormSchema = z.object({
     .min(1, "Product name is required")
     .max(250, "Product name is too long, max of 250 characters"),
 
-  slug: z
+  tagline: z
     .string()
-    .min(1, "Slug is required")
-    .regex(
-      slugPattern,
-      "Slug must be lowercase, URL-safe, and may use hyphens only",
-    ),
+    .min(1, "Product tagline is required")
+    .max(250, "Product tagline is too long, max of 250 characters"),
 
   description: z
     .string()
@@ -78,7 +75,7 @@ export const createProductServerParseSchema = z.object({
     .string()
     .min(1, "Product name is required")
     .max(250, "Product name is too long, max of 250 characters"),
-  
+
   tagline: z
     .string()
     .min(1, "Product tagline is required")
@@ -100,22 +97,23 @@ export const createProductServerParseSchema = z.object({
   liveUrl: z
     .preprocess((value) => {
       if (typeof value !== "string") return undefined;
-      const trimmed = value.trim();
+
+      let trimmed = value.trim();
+      if (
+        trimmed.length &&
+        !trimmed.includes("https://") &&
+        !trimmed.includes("http://")
+      ) {
+        trimmed = `https://${trimmed}`;
+      }
+
       return trimmed.length ? trimmed : undefined;
     }, z.url("Enter a valid URL").optional())
     .optional(),
 
   tags: z
-    .string()
-    .transform((value) => normalizeTags(value))
-    .superRefine((tags, ctx) => {
-      if (!Array.isArray(tags) || tags.length === 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Add at least one tag",
-        });
-      }
-    }),
+    .array(z.string().min(1, "Tag cannot be blank"))
+    .min(1, "Add at least one tag"),
 
   image: z
     .custom<File>((value) => value instanceof File, {

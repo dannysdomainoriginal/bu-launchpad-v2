@@ -3,18 +3,19 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 
 import uploadService from "@/modules/upload/upload.service";
-import { createProductServerParseSchema } from "../products.schema";
+import {
+  CreateProductFormSchemaType,
+  createProductServerParseSchema,
+} from "../products.schema";
 import { insertNewProduct } from "../products.service";
 
 type FormState = {
   success: boolean;
-  errors?: Record<string, string[] | undefined>;
   message: string;
 };
 
 export const addProductAction = async (
-  prevState: FormState,
-  formData: FormData,
+  data: CreateProductFormSchemaType & { slug: string },
 ): Promise<FormState> => {
   const authContext = await auth();
   const { userId, orgId } = authContext;
@@ -34,23 +35,12 @@ export const addProductAction = async (
     };
   }
 
-  const tagsValue = formData.get("tags");
-  const imageValue = formData.get("image");
-
-  const parsed = createProductServerParseSchema.safeParse({
-    name: formData.get("name"),
-    slug: formData.get("slug"),
-    description: formData.get("description"),
-    liveUrl: formData.get("liveUrl"),
-    tags: typeof tagsValue === "string" ? tagsValue : "",
-    image: imageValue,
-  });
+  const parsed = createProductServerParseSchema.safeParse(data);
 
   if (!parsed.success) {
     return {
       success: false,
-      errors: parsed.error.flatten().fieldErrors,
-      message: "Please correct the highlighted fields.",
+      message: parsed.error.issues[0]?.message,
     };
   }
 

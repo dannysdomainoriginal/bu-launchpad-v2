@@ -1,13 +1,13 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 
 import ProductAssuranceBox from "./ProductAssuranceBox";
 import ProductSubmitForm from "./ProductSubmitForm";
 import ProductSignInBox from "./ProductSignInBox";
 
 export default async function ProductSubmitFormWrapper() {
-  const user = await currentUser();
+  const { userId } = await auth();
 
-  if (!user) {
+  if (!userId) {
     return <ProductSignInBox />;
   }
 

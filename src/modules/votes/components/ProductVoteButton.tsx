@@ -25,7 +25,7 @@ export default function ProductVoteButton({
         window.alert("Your vote has been recorded!");
       } catch (err) {
         window.alert("Error recording your vote");
-        console.error("Vote failed:", err);
+        console.error("handleAddVote failed:", err);
       }
     });
   };
@@ -37,7 +37,7 @@ export default function ProductVoteButton({
         window.alert("You removed your vote for this innovation");
       } catch (err) {
         window.alert("Error removing your vote");
-        console.error("Vote failed:", err);
+        console.error("handleRemoveVote failed:", err);
       }
     });
   };

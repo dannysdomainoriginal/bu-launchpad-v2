@@ -1,9 +1,10 @@
-import { RocketIcon, SparklesIcon } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
+import { RocketIcon, SparklesIcon } from "lucide-react";
+import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
+
 import NavMenu from "./NavMenu";
 import { Button } from "../ui/button";
-import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
-import { Suspense } from "react";
 
 const Logo = () => (
   <Link href="/" className="flex items-center gap-2 group">

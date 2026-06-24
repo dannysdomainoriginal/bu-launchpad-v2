@@ -104,7 +104,7 @@ export default function ProductImageUpload({
         onDragLeave={() => setDragActive(false)}
         onDrop={handleDrop}
         className={cn(
-          "group relative rounded-3xl border border-dashed border-input/70 bg-background/80 p-6 text-center transition focus:outline-none focus:ring-2 focus:ring-ring/50 focus:ring-offset-2 focus:ring-offset-background hover:border-primary",
+          "group rounded-3xl border border-dashed border-input/70 bg-background/80 p-6 text-center transition focus:outline-none focus:ring-2 focus:ring-ring/50 focus:ring-offset-2 focus:ring-offset-background hover:border-primary",
           dragActive && "border-primary/80 bg-primary/5",
         )}
       >
@@ -118,12 +118,12 @@ export default function ProductImageUpload({
           onChange={(event) => handleFiles(event.target.files)}
         />
         {previewUrl ? (
-          <div className="mx-auto max-w-sm overflow-hidden rounded-3xl border border-border bg-muted">
+          <div className="h-60 relative mx-auto max-w-sm overflow-hidden rounded-3xl border border-border bg-muted">
             <Image
               fill
               src={previewUrl}
               alt="Selected product preview"
-              className="h-60 w-full object-cover"
+              className="w-full object-cover"
             />
           </div>
         ) : (
