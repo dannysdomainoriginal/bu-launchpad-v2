@@ -6,7 +6,7 @@ import {
 import sharp from "sharp";
 
 if (!process.env.R2_PUBLIC_URL) {
-  console.log("Please provide your r2 bucket public url");
+  throw new Error("Please provide your r2 bucket public url");
 }
 
 class UploadService {
