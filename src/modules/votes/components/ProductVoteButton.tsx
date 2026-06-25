@@ -7,13 +7,15 @@ import { addVote, removeVote } from "../votes.service";
 
 interface Props {
   hasVoted: boolean;
-  productId: string;
+  setHasVoted: React.Dispatch<React.SetStateAction<boolean>>;
+  product: { id: string; slug: string };
   userId: string;
 }
 
 export default function ProductVoteButton({
   hasVoted,
-  productId,
+  setHasVoted,
+  product,
   userId,
 }: Props) {
   const [isPending, startTransition] = useTransition();
@@ -21,7 +23,8 @@ export default function ProductVoteButton({
   const handleAddVote = () => {
     startTransition(async () => {
       try {
-        await addVote({ productId, userId });
+        await addVote({ product, userId });
+        setHasVoted(true);
         window.alert("Your vote has been recorded!");
       } catch (err) {
         window.alert("Error recording your vote");
@@ -33,7 +36,8 @@ export default function ProductVoteButton({
   const handleRemoveVote = () => {
     startTransition(async () => {
       try {
-        await removeVote({ productId, userId });
+        await removeVote({ product, userId });
+        setHasVoted(false);
         window.alert("You removed your vote for this innovation");
       } catch (err) {
         window.alert("Error removing your vote");

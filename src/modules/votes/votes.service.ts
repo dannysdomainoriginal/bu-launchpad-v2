@@ -1,38 +1,40 @@
 "use server";
 
 import { and, eq, sql } from "drizzle-orm";
-import { refresh, revalidateTag } from "next/cache";
+import { refresh, revalidatePath, revalidateTag } from "next/cache";
 
 import { db } from "@/lib/db";
 import { productVotes } from "@/lib/db/schema";
+import { auth } from "@clerk/nextjs/server";
 
 interface AddOrRemoveVoteParams {
   userId: string;
-  productId: string;
+  product: { id: string; slug: string };
 }
 
 /* -------------------------------------------------------------------------- */
 /*                                  ADD VOTE                                  */
 /* -------------------------------------------------------------------------- */
-export async function addVote({ productId, userId }: AddOrRemoveVoteParams) {
+export async function addVote({ product, userId }: AddOrRemoveVoteParams) {
   await db
     .insert(productVotes)
-    .values({ productId, userId })
+    .values({ productId: product.id, userId })
     .onConflictDoNothing();
 
-  revalidateTag(`product:by-id:${productId}`, "max");
+  revalidateTag(`product:by-id:${product.id}`, "max");
+  revalidatePath(`/products/${product.slug}`, "page");
   refresh();
 }
 
 /* -------------------------------------------------------------------------- */
 /*                                 REMOVE VOTE                                */
 /* -------------------------------------------------------------------------- */
-export async function removeVote({ productId, userId }: AddOrRemoveVoteParams) {
+export async function removeVote({ product, userId }: AddOrRemoveVoteParams) {
   const { rowCount } = await db
     .delete(productVotes)
     .where(
       and(
-        eq(productVotes.productId, productId),
+        eq(productVotes.productId, product.id),
         eq(productVotes.userId, userId),
       ),
     );
@@ -41,7 +43,8 @@ export async function removeVote({ productId, userId }: AddOrRemoveVoteParams) {
     throw new Error("PRODUCT_VOTE_NOT_FOUND");
   }
 
-  revalidateTag(`product:by-id:${productId}`, "max");
+  revalidateTag(`product:by-id:${product.id}`, "max");
+  revalidatePath(`/products/${product.slug}`, "page");
   refresh();
 }
 
@@ -58,4 +61,14 @@ export async function checkVoteStatus(productId: string, userId: string) {
   `);
 
   return Boolean(result.rows[0]?.exists);
+}
+
+export async function getVoteStatus(productId: string) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return false;
+  }
+
+  return checkVoteStatus(productId, userId);
 }

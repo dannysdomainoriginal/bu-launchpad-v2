@@ -73,15 +73,12 @@ export default function ProductDetails({ product, tags }: Props) {
             )}
 
             {/* Vote Button */}
-            <Suspense
-              fallback={
-                <Button variant="outline" className="w-full py-5">
-                  Loading...
-                </Button>
-              }
-            >
-              <ProductVoteButtonWrapper productId={product.id} />
-            </Suspense>
+            <ProductVoteButtonWrapper
+              product={{
+                id: product.id,
+                slug: product.slug,
+              }}
+            />
           </div>
         </Card>
       </div>
