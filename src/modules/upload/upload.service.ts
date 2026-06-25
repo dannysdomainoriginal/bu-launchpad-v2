@@ -24,7 +24,7 @@ class UploadService {
   }
 
   async convertToWebp(fileBuffer: Buffer): Promise<Buffer> {
-    return await sharp(fileBuffer).webp({ quality: 80}).toBuffer();
+    return await sharp(fileBuffer).webp({ quality: 80 }).toBuffer();
   }
 
   async uploadImageFile({ file, key }: { file: File; key: string }) {
@@ -35,11 +35,13 @@ class UploadService {
       fileBuffer = await this.convertToWebp(fileBuffer);
     }
 
+    const safeBuffer = Buffer.from(fileBuffer);
+
     await this.client.send(
       new PutObjectCommand({
         Bucket: process.env.R2_BUCKET,
         Key: key,
-        Body: fileBuffer,
+        Body: safeBuffer,
         ContentType: "image/webp",
       }),
     );
