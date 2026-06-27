@@ -4,6 +4,12 @@ import {
   ProductDetailsWrapper,
   ProductDetailsSkeleton,
 } from "@/modules/products/products.component";
+import { db } from "@/lib/db";
+import { products } from "@/lib/db/schema";
+
+export async function generateStaticParams() {
+  return db.select({ slug: products.slug }).from(products);
+}
 
 type Props = {
   params: Promise<{ slug: string }>;

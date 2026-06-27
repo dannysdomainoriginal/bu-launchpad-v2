@@ -1,3 +1,5 @@
+"use cache";
+
 import { notFound } from "next/navigation";
 
 import { getProductBySlug } from "../products.service";
