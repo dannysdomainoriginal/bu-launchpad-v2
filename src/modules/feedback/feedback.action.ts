@@ -3,6 +3,7 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { createFeedbackSchema } from "./feedback.schema";
 import { insertFeedback } from "./feedback.service";
+import mailService from "@/modules/mail/mail.service";
 import { revalidateTag } from "next/cache";
 
 type FormState = {
@@ -13,7 +14,7 @@ type FormState = {
 type Props = {
   productId: string;
   message: string;
-}
+};
 
 export async function addFeedbackAction(data: Props): Promise<FormState> {
   const { userId } = await auth();
@@ -47,6 +48,11 @@ export async function addFeedbackAction(data: Props): Promise<FormState> {
   }
 
   const feedbackId = crypto.randomUUID();
+  const senderName =
+    user.fullName ||
+    `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() ||
+    user.username ||
+    "Anonymous";
 
   try {
     await insertFeedback({
@@ -54,12 +60,19 @@ export async function addFeedbackAction(data: Props): Promise<FormState> {
       productId: parsed.data.productId,
       message: parsed.data.message,
       userId,
-      userName:
-        user.fullName ||
-        `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() ||
-        user.username ||
-        "Anonymous",
+      userName: senderName,
       userAvatar: user.imageUrl ?? null,
+    });
+
+    await mailService.sendFeedbackEmail({
+      to:
+        process.env.FEEDBACK_NOTIFICATION_EMAIL ||
+        process.env.SMTP_TO ||
+        process.env.SMTP_FROM ||
+        "",
+      productName: parsed.data.productId,
+      feedbackMessage: parsed.data.message,
+      senderName,
     });
 
     revalidateTag(`product:${parsed.data.productId}:feedback`, "max");
