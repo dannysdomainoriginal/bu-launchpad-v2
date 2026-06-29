@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "sonner";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -47,6 +48,7 @@ export default function RootLayout({
           <Header />
           <div className="flex-1">{children}</div>
           <Footer />
+          <Toaster position="top-right" richColors closeButton />
         </body>
       </html>
     </ClerkProvider>

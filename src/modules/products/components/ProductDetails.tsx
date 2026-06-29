@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { Suspense } from "react";
 import { ArrowUpRight, Users } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { ProductWithTags } from "@/lib/db/schema";
 
 import { ProductVoteButtonWrapper } from "@/modules/votes/votes.component";
+import ProductFeedbackMessageBox from "@/modules/feedback/components/ProductFeedbackMessageBox";
 
 type Props = {
   product: ProductWithTags;
@@ -106,22 +106,27 @@ export default function ProductDetails({ product, tags }: Props) {
           </section>
         </div>
 
-        <Card className="h-fit p-6">
-          <div className="space-y-4">
-            <Image
-              alt={product.authorName}
-              src={product.authorAvatar}
-              width={80}
-              height={80}
-              className="rounded-full"
-            />
+        <div className="space-y-6">
+          <Card className="h-fit p-6">
+            <div className="space-y-4">
+              <Image
+                alt={product.authorName}
+                src={product.authorAvatar}
+                width={80}
+                height={80}
+                className="rounded-full"
+              />
 
-            <div>
-              <p className="font-medium">{product.authorName}</p>
-              <p className="text-sm text-muted-foreground">Builder</p>
+              <div>
+                <p className="font-medium">{product.authorName}</p>
+                <p className="text-sm text-muted-foreground">Builder</p>
+              </div>
             </div>
-          </div>
-        </Card>
+          </Card>
+
+          {/* Feedback Feature */}
+          <ProductFeedbackMessageBox productId={product.id} />
+        </div>
       </div>
     </div>
   );

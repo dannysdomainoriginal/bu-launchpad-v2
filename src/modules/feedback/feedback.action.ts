@@ -8,13 +8,14 @@ import { revalidateTag } from "next/cache";
 type FormState = {
   success: boolean;
   message: string;
-  errors?: Record<string, string[] | undefined>;
 };
 
-export async function addFeedbackAction(
-  prevState: FormState,
-  formData: FormData,
-): Promise<FormState> {
+type Props = {
+  productId: string;
+  message: string;
+}
+
+export async function addFeedbackAction(data: Props): Promise<FormState> {
   const { userId } = await auth();
 
   if (!userId) {
@@ -34,15 +35,14 @@ export async function addFeedbackAction(
   }
 
   const parsed = createFeedbackSchema.safeParse({
-    productId: formData.get("productId"),
-    message: formData.get("message"),
+    productId: data.productId,
+    message: data.message,
   });
 
   if (!parsed.success) {
     return {
       success: false,
-      message: "Invalid feedback input.",
-      errors: parsed.error.flatten().fieldErrors,
+      message: parsed.error.issues[0]?.message,
     };
   }
 
@@ -62,11 +62,11 @@ export async function addFeedbackAction(
       userAvatar: user.imageUrl ?? null,
     });
 
-    revalidateTag(`feedback:product:${parsed.data.productId}`, "max");
+    revalidateTag(`product:${parsed.data.productId}:feedback`, "max");
 
     return {
       success: true,
-      message: "Feedback submitted.",
+      message: "Feedback submitted successfully.",
     };
   } catch (err) {
     return {
