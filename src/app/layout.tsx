@@ -31,6 +31,18 @@ export const metadata: Metadata = {
     "bu discover",
   ],
   authors: [{ name: "Dannys Domain" }],
+  openGraph: {
+    title: "BU Launchpad - Share Your Creations, Discover New Launches",
+    description:
+      "Built by students.\nPowered by ideas.\nShowcase your projects, discover what others are building, turn your innovation into something visible.",
+    images: [
+      {
+        url: "https://dannysdomain.vercel.app/og/image.png",
+        width: 1891,
+        height: 858
+      }
+    ]
+  },
 };
 
 export default function RootLayout({
