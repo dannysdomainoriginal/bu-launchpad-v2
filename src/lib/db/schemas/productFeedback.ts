@@ -33,3 +33,5 @@ export const productFeedback = pgTable(
     userIdx: index("feedback_user_idx").on(table.userId),
   }),
 );
+
+export type ProductFeedbackType = typeof productFeedback.$inferSelect;

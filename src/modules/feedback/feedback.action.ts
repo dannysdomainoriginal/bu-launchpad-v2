@@ -1,10 +1,10 @@
 "use server";
 
+import { revalidateTag } from "next/cache";
 import { auth, currentUser } from "@clerk/nextjs/server";
+
 import { createFeedbackSchema } from "./feedback.schema";
 import { insertFeedback } from "./feedback.service";
-import mailService from "@/modules/mail/mail.service";
-import { revalidateTag } from "next/cache";
 
 type FormState = {
   success: boolean;
@@ -64,17 +64,6 @@ export async function addFeedbackAction(data: Props): Promise<FormState> {
       userAvatar: user.imageUrl ?? null,
     });
 
-    await mailService.sendFeedbackEmail({
-      to:
-        process.env.FEEDBACK_NOTIFICATION_EMAIL ||
-        process.env.SMTP_TO ||
-        process.env.SMTP_FROM ||
-        "",
-      productName: parsed.data.productId,
-      feedbackMessage: parsed.data.message,
-      senderName,
-    });
-
     revalidateTag(`product:${parsed.data.productId}:feedback`, "max");
 
     return {
@@ -82,6 +71,8 @@ export async function addFeedbackAction(data: Props): Promise<FormState> {
       message: "Feedback submitted successfully.",
     };
   } catch (err) {
+    process.env.NODE_ENV === "development" && console.log(err);
+    
     return {
       success: false,
       message: "Failed to submit feedback.",

@@ -48,7 +48,7 @@ export default function RootLayout({
           <Header />
           <div className="flex-1">{children}</div>
           <Footer />
-          <Toaster position="top-right" richColors closeButton />
+          <Toaster position="top-right" richColors />
         </body>
       </html>
     </ClerkProvider>
