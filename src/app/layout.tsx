@@ -37,8 +37,8 @@ export const metadata: Metadata = {
       "Built by students.\nPowered by ideas.\nShowcase your projects, discover what others are building, turn your innovation into something visible.",
     images: [
       {
-        url: "https://dannysdomain.vercel.app/og/image.png",
-        width: 1891,
+        url: "https://bu-launchpad.vercel.app/og/image.png",
+        width: 1639,
         height: 858
       }
     ]
