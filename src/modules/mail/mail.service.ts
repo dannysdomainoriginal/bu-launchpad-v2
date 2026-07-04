@@ -1,9 +1,11 @@
 import nodemailer from "nodemailer";
 
+const port = Number(process.env.MAIL_PORT);
+
 const client = nodemailer.createTransport({
   host: process.env.MAIL_HOST,
-  port: process.env.NODE_ENV === "production" ? 465 : 587,
-  secure: process.env.NODE_ENV === "production",
+  port,
+  secure: port === 465,
   auth: {
     user: process.env.MAIL_ACCOUNT,
     pass: process.env.MAIL_PASSWORD,

@@ -5,14 +5,7 @@ import { cacheTag } from "next/cache";
 
 /* ------------------------------ CREATE FEEDBACK ------------------------------ */
 
-export async function insertFeedback(data: {
-  id: string;
-  productId: string;
-  userId: string;
-  userName: string;
-  userAvatar: string | null;
-  message: string;
-}) {
+export async function insertFeedback(data: typeof productFeedback.$inferInsert) {
   await db.insert(productFeedback).values(data);
 }
 
