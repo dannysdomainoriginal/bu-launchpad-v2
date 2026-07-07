@@ -80,7 +80,7 @@ export async function addCollaborationRequestAction(
       return {
         success: false,
         message: "Failed to send collaboration request email.",
-      }
+      };
     }
 
     revalidateTag(`product:${parsed.data.productId}:collaboration`, "max");

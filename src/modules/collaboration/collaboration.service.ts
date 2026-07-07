@@ -72,3 +72,9 @@ export async function getProductCollaborationRequests(productId: string) {
     .where(eq(productCollaboration.productId, productId))
     .orderBy(desc(productCollaboration.createdAt));
 }
+
+export async function deleteCollaborationRequestById(requestId: string) {
+  return db
+    .delete(productCollaboration)
+    .where(eq(productCollaboration.id, requestId));
+}
