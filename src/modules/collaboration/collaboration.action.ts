@@ -3,7 +3,7 @@
 import { revalidateTag } from "next/cache";
 import { auth, currentUser } from "@clerk/nextjs/server";
 
-import { handleCollaborationEmail } from "@/modules/mail/processors/handleCollaborationEmail";
+import { handleCollaborationEmail } from "@/modules/mail";
 
 import { createCollaborationRequestSchema } from "./collaboration.schema";
 import { insertCollaborationRequest } from "./collaboration.service";
@@ -75,7 +75,13 @@ export async function addCollaborationRequestAction(
       };
     }
 
-    await handleCollaborationEmail(requestId);
+    const success = await handleCollaborationEmail(requestId);
+    if (!success) {
+      return {
+        success: false,
+        message: "Failed to send collaboration request email.",
+      }
+    }
 
     revalidateTag(`product:${parsed.data.productId}:collaboration`, "max");
 
