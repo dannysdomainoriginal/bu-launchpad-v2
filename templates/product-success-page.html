@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Project Submitted | BU Launchpad</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              // Replace this with your app's bg-primary/text-primary classes.
+              primary: "oklch(0.56 0.26 300)",
+            },
+            keyframes: {
+              checkPop: {
+                "0%": {
+                  transform: "scale(0.6)",
+                  opacity: "0",
+                },
+                "70%": {
+                  transform: "scale(1.08)",
+                },
+                "100%": {
+                  transform: "scale(1)",
+                  opacity: "1",
+                },
+              },
+              drawCheck: {
+                from: {
+                  strokeDashoffset: "40",
+                },
+                to: {
+                  strokeDashoffset: "0",
+                },
+              },
+              spin: {
+                to: {
+                  transform: "rotate(360deg)",
+                },
+              },
+            },
+            animation: {
+              "check-pop": "checkPop .5s ease forwards",
+              "draw-check": "drawCheck .7s ease forwards .25s",
+              spin: "spin 1s linear infinite",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+
+  <body class="bg-black text-white antialiased">
+    <!--
+    =====================================================
+    BU LAUNCHPAD - PRODUCT SUBMISSION SUCCESS PAGE
+    =====================================================
+
+    ROUTE:
+    /dashboard/products/[id]/submitted
+
+    PURPOSE:
+    This page is NOT just a success page.
+    It acts as a submission state resolver.
+
+    FLOW:
+
+    Request
+       ↓
+    Fetch Product
+       ↓
+    ┌──────────────────────────────────┐
+    │ Product not found               │
+    │ → notFound()                    │
+    └──────────────────────────────────┘
+
+    ┌──────────────────────────────────┐
+    │ product.status === "approved"   │
+    │ → redirect("/products/[slug]")  │
+    └──────────────────────────────────┘
+
+    ┌──────────────────────────────────┐
+    │ product.status === "rejected"   │
+    │ → redirect("/dashboard/products/[id]") │
+    └──────────────────────────────────┘
+
+    ┌──────────────────────────────────┐
+    │ product.status === "pending"    │
+    │ → render success page           │
+    └──────────────────────────────────┘
+
+    LOADING STATE:
+
+    While the product is being fetched,
+    DO NOT render:
+
+    ✓ Success icon
+    ✓ Success heading
+    ✓ Summary skeleton
+
+    Reason:
+    The product status determines whether this page
+    should even exist. Rendering the success page first
+    could briefly show incorrect information before
+    redirecting.
+
+    Instead:
+
+            [spinner]
+      Loading your submission...
+
+    =====================================================
+    -->
+
+    <!-- ==================================================
+         LOADING STATE MOCKUP
+         ==================================================
+
+    <main class="flex min-h-screen items-center justify-center">
+      <div class="flex flex-col items-center gap-5">
+        <div
+          class="h-9 w-9 rounded-full border-2 border-zinc-700 border-t-primary animate-spin"
+        ></div>
+
+        <p class="text-sm text-zinc-400">
+          Loading your submission...
+        </p>
+      </div>
+    </main>
+
+    ================================================== -->
+
+    <!--
+      SUCCESS STATE
+      Only render if:
+
+      product.status === "pending"
+    -->
+
+    <main class="min-h-screen">
+      <div class="mx-auto max-w-3xl px-6 py-16 md:py-20">
+        <!-- Success Header -->
+        <section class="text-center">
+          <div
+            class="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-primary/30 bg-primary/10 shadow-lg shadow-primary/10 animate-check-pop"
+          >
+            <svg
+              class="h-10 w-10 text-primary"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <path
+                d="M5 13L10 18L19 7"
+                stroke="currentColor"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-dasharray="40"
+                stroke-dashoffset="40"
+                class="animate-draw-check"
+              />
+            </svg>
+          </div>
+
+          <h1
+            class="mt-8 text-3xl font-bold tracking-tight md:text-4xl"
+          >
+            Project submitted successfully.
+          </h1>
+
+          <p
+            class="mx-auto mt-3 max-w-lg text-sm text-zinc-400 md:text-base"
+          >
+            Your innovation is now under review and will be visible once
+            approved.
+          </p>
+        </section>
+
+        <!-- Submission Summary -->
+        <section
+          class="mt-14 rounded-4xl border border-white/10 bg-zinc-950 p-6 md:p-8"
+        >
+          <h2 class="text-2xl font-semibold">
+            Submission Summary
+          </h2>
+
+          <div class="mt-10 space-y-10">
+            <!-- Product Name -->
+            <div>
+              <p
+                class="text-xs uppercase tracking-[0.2em] text-zinc-500"
+              >
+                Product Name
+              </p>
+
+              <p class="mt-2 text-lg font-medium">
+                BU Launchpad
+              </p>
+            </div>
+
+            <!-- Tagline -->
+            <div>
+              <p
+                class="text-xs uppercase tracking-[0.2em] text-zinc-500"
+              >
+                Tagline
+              </p>
+
+              <p class="mt-2 text-zinc-200">
+                Discover, validate and launch student startups.
+              </p>
+            </div>
+
+            <!-- Slug -->
+            <div>
+              <p
+                class="text-xs uppercase tracking-[0.2em] text-zinc-500"
+              >
+                Slug
+              </p>
+
+              <p class="mt-2 font-mono text-primary">
+                bu-launchpad
+              </p>
+            </div>
+
+            <!-- Description -->
+            <div>
+              <p
+                class="text-xs uppercase tracking-[0.2em] text-zinc-500"
+              >
+                Description
+              </p>
+
+              <p class="mt-2 leading-7 text-zinc-300">
+                A platform where student founders can showcase startup
+                ideas, gather feedback, discover collaborators and build
+                early traction within their university communities.
+              </p>
+            </div>
+
+            <!-- Live URL -->
+            <div>
+              <p
+                class="text-xs uppercase tracking-[0.2em] text-zinc-500"
+              >
+                Live URL
+              </p>
+
+              <a
+                href="#"
+                class="mt-2 inline-block text-primary underline underline-offset-4"
+              >
+                https://bulaunchpad.com
+              </a>
+            </div>
+
+            <!-- Category -->
+            <div>
+              <p
+                class="text-xs uppercase tracking-[0.2em] text-zinc-500"
+              >
+                Category
+              </p>
+
+              <p class="mt-2 text-zinc-200">
+                Education
+              </p>
+            </div>
+
+            <!-- Tags -->
+            <div>
+              <p
+                class="text-xs uppercase tracking-[0.2em] text-zinc-500"
+              >
+                Tags
+              </p>
+
+              <div class="mt-4 flex flex-wrap gap-3">
+                <span
+                  class="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm text-primary"
+                >
+                  SaaS
+                </span>
+
+                <span
+                  class="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm text-primary"
+                >
+                  Startup
+                </span>
+
+                <span
+                  class="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm text-primary"
+                >
+                  Community
+                </span>
+              </div>
+            </div>
+
+            <!-- Product Image -->
+            <div>
+              <p
+                class="text-xs uppercase tracking-[0.2em] text-zinc-500"
+              >
+                Product Image
+              </p>
+
+              <div
+                class="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black"
+              >
+                <img
+                  src="https://placehold.co/1200x630"
+                  alt="Product Preview"
+                  class="aspect-video w-full object-cover"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Actions -->
+        <section class="mt-10 text-center">
+          <button
+            class="h-12 w-full rounded-xl bg-primary text-sm font-medium text-white transition duration-200 hover:opacity-90"
+          >
+            Navigate to Dashboard
+          </button>
+
+          <button
+            class="mt-5 text-sm text-zinc-500 transition hover:text-zinc-300"
+          >
+            Submit another project
+          </button>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

@@ -16,7 +16,7 @@ export default async function ProductDetailsWrapper({ params }: Props) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
 
-  if (!product) {
+  if (!product || !product.isApproved) {
     return notFound();
   }
 

@@ -74,8 +74,33 @@ export async function getProductBySlug(slug: string) {
   if (product) {
     cacheTag(`product:by-id:${product.id}`);
   }
-  
+
   return product;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                    GET PRODUCT DETAILS FOR SUCCESS PAGE                    */
+/* -------------------------------------------------------------------------- */
+export async function getProductDetailsBySlug(slug: string) {
+  return db.query.products.findFirst({
+    where: (products, { eq }) => eq(products.slug, slug),
+    columns: {
+      name: true,
+      tagline: true,
+      slug: true,
+      description: true,
+      image: true,
+      liveUrl: true,
+      isApproved: true,
+    },
+    with: {
+      tags: {
+        columns: {
+          name: true,
+        },
+      },
+    },
+  });
 }
 
 /* -------------------------------------------------------------------------- */

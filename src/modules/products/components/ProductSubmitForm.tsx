@@ -1,9 +1,11 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SparklesIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import ProductFormField from "./ProductFormField";
 import ProductImageUpload from "./ProductImageUploader";
@@ -55,6 +57,8 @@ export default function ProductSubmitForm() {
   const nameValue = watch("name");
   const slugValue = slugify(nameValue);
 
+  const router = useRouter()
+
   const onSubmit: SubmitHandler<CreateProductFormSchemaType> = async (data) => {
     try {
       const serverResponse = await addProductAction({
@@ -64,20 +68,31 @@ export default function ProductSubmitForm() {
 
       setState(serverResponse);
 
-      if (serverResponse.success) {
-        reset({
-          name: "",
-          description: "",
-          liveUrl: undefined,
-          tags: [],
-          image: undefined,
-        });
+      if (!serverResponse.success) {
+        toast.error(
+          serverResponse.message ??
+            "There was an error submitting your product",
+        );
+
+        return;
       }
-    } catch (err: any) {
+
+      reset({
+        name: "",
+        description: "",
+        liveUrl: undefined,
+        tags: [],
+        image: undefined,
+      });
+
+      router.push(`/success/${slugValue}`);
+    } catch (err) {
       setState({
         success: false,
         message: "There was an error submitting your product",
       });
+
+      toast.error("There was an error submitting your product");
     }
   };
 
