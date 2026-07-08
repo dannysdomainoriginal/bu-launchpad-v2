@@ -2,14 +2,15 @@ import Image from "next/image";
 import { ArrowUpRight, Users } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { BackButton } from "@/components/ui/BackButton";
 import { Button } from "@/components/ui/button";
 import { RelativeTime } from "@/components/ui/RelativeTime";
 import { Card } from "@/components/ui/card";
 import { ProductWithTags } from "@/lib/db/schema";
 
 import { ProductVoteButtonWrapper } from "@/modules/votes/votes.component";
-import ProductFeedbackMessageBox from "@/modules/feedback/components/ProductFeedbackMessageBox";
-import ProductCollaborationRequestBox from "@/modules/collaboration/components/ProductCollaborationRequestBox";
+import { ProductFeedbackMessageBox } from "@/modules/feedback/feedback.component";
+import { ProductCollaborationRequestBox } from "@/modules/collaboration/collaboration.component";
 
 type Props = {
   product: ProductWithTags;
@@ -19,6 +20,8 @@ type Props = {
 export default function ProductDetails({ product, tags }: Props) {
   return (
     <div>
+      <BackButton />
+
       {/* HEADER */}
       <div className="grid gap-6 border-b pb-6 md:pb-10 md:grid-cols-[1fr_320px]">
         <div className="space-y-4">
