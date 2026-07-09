@@ -1,0 +1,1355 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BU Launchpad Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* NOTE FOR NEXT.JS PORT:
+         - Tokens below are copied 1:1 from globals.css (:root block). In the real
+           app these already exist as CSS vars — this file just inlines them so the
+           static draft renders with the real palette without a Tailwind v4 build.
+         - Utility classes here (card-modern, interactive, glow-primary, grid-wrapper)
+           mirror your @layer components/utilities — written as plain CSS since the
+           Tailwind Play CDN can't process @apply. Swap these <div class="..."> for
+           your real classes 1:1 once this is in the actual app; no need to
+           reinvent them.
+         - Persistent top app nav still intentionally omitted — same as last pass.
+         - Font here is just Inter as a stand-in for Geist/Manrope/Instrument Serif
+           so the draft isn't rendering in Times New Roman. Swap for the real
+           font vars when ported.
+      */
+      :root {
+        --background: oklch(0.145 0.01 270);
+        --foreground: oklch(0.96 0.01 270);
+        --card: oklch(0.18 0.012 270);
+        --card-foreground: oklch(0.96 0.01 270);
+        --popover: oklch(0.19 0.012 270);
+        --primary: oklch(0.56 0.26 300);
+        --primary-light: oklch(0.6 0.24 305);
+        --primary-foreground: oklch(0.99 0 0);
+        --secondary: oklch(0.24 0.02 270);
+        --secondary-foreground: oklch(0.93 0.01 270);
+        --accent: oklch(0.28 0.04 290);
+        --accent-foreground: oklch(0.98 0 0);
+        --muted: oklch(0.22 0.015 270);
+        --muted-foreground: oklch(0.7 0.015 270);
+        --destructive: oklch(0.62 0.24 25);
+        --destructive-foreground: oklch(0.98 0 0);
+        --border: oklch(0.26 0.015 270);
+        --input: oklch(0.24 0.015 270);
+        --ring: oklch(0.56 0.26 300);
+        --sidebar: oklch(0.16 0.012 270);
+        --radius: 0.9rem;
+        --radius-sm: calc(0.9rem - 4px);
+        --radius-md: calc(0.9rem - 2px);
+        --radius-lg: 0.9rem;
+        --radius-xl: calc(0.9rem + 4px);
+      }
+
+      html {
+        color-scheme: dark;
+        scroll-behavior: smooth;
+      }
+      body {
+        background: var(--background);
+        color: var(--foreground);
+        font-family: "Inter", sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* --- from your globals.css, ported as plain CSS --- */
+      .card-modern {
+        background: linear-gradient(
+          180deg,
+          rgb(255 255 255 / 0.03),
+          rgb(255 255 255 / 0.01)
+        );
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgb(255 255 255 / 0.06);
+      }
+      .interactive {
+        transition:
+          transform 180ms ease,
+          background-color 180ms ease,
+          border-color 180ms ease,
+          box-shadow 180ms ease;
+      }
+      .interactive:hover {
+        transform: translateY(-2px);
+      }
+      .glow-primary {
+        box-shadow:
+          0 0 0 1px rgb(114 0 224 / 0.2),
+          0 0 20px rgb(114 0 224 / 0.35),
+          0 0 60px rgb(114 0 224 / 0.15);
+      }
+      .grid-wrapper {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+      @media (min-width: 768px) {
+        .grid-wrapper {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (min-width: 1024px) {
+        .grid-wrapper {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+      /* dock / FAB glass — dark-mode tuned version of your card-modern */
+      .glass-dark {
+        background: rgb(255 255 255 / 0.06);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgb(255 255 255 / 0.08);
+      }
+
+      .dial-btn {
+        transition:
+          opacity 0.22s ease,
+          transform 0.22s ease;
+      }
+      .dial-closed .dial-btn {
+        opacity: 0;
+        transform: translateY(8px) scale(0.85);
+        pointer-events: none;
+      }
+      .fab-icon {
+        transition: transform 0.25s ease;
+      }
+      .fab-open .fab-icon {
+        transform: rotate(45deg);
+      }
+      .tab-indicator {
+        transition:
+          left 0.25s ease,
+          width 0.25s ease;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen">
+    <div class="max-w-7xl mx-auto p-6 pb-32 md:pb-10">
+      <!-- Header -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold" style="color: var(--foreground)">
+          Welcome back, Daniel 👋
+        </h1>
+        <p class="mt-2" style="color: var(--muted-foreground)">
+          Here's what's happening with your startups today.
+        </p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="hidden md:block mb-8">
+        <div
+          id="tab-track"
+          class="relative inline-flex rounded-full p-1.5 gap-1"
+          style="background: var(--muted)"
+        >
+          <div
+            id="tab-indicator"
+            class="tab-indicator absolute top-1.5 bottom-1.5 rounded-full"
+            style="background: var(--card); box-shadow: var(--shadow-sm)"
+          ></div>
+          <button
+            data-tab="overview"
+            class="tab-btn relative z-10 px-5 py-2.5 rounded-full font-medium text-sm"
+          >
+            Overview
+          </button>
+          <button
+            data-tab="feedback"
+            class="tab-btn relative z-10 px-5 py-2.5 rounded-full font-medium text-sm"
+          >
+            Feedback
+          </button>
+          <button
+            data-tab="collabs"
+            class="tab-btn relative z-10 px-5 py-2.5 rounded-full font-medium text-sm"
+          >
+            Collabs
+          </button>
+          <button
+            data-tab="innovations"
+            class="tab-btn relative z-10 px-5 py-2.5 rounded-full font-medium text-sm"
+          >
+            Innovations
+          </button>
+        </div>
+      </div>
+
+      <div class="md:hidden mb-6">
+        <p
+          id="mobile-tab-label"
+          class="text-lg font-semibold"
+          style="color: var(--foreground)"
+        >
+          Overview
+        </p>
+      </div>
+
+      <!-- ========================= OVERVIEW ========================= -->
+      <div id="overview" class="tab-content">
+        <!-- Stats now live here only — scoped to Overview, not global chrome -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+          <div
+            class="lg:col-span-2 card-modern interactive rounded-[var(--radius-lg)] p-6 relative overflow-hidden"
+          >
+            <div class="flex items-center justify-between">
+              <p
+                class="text-sm font-medium"
+                style="color: var(--muted-foreground)"
+              >
+                Feedback
+              </p>
+              <svg
+                class="w-5 h-5"
+                style="color: var(--primary-light)"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8-1.297 0-2.53-.24-3.646-.673L3 21l1.673-4.354C4.24 15.53 4 14.297 4 13c0-4.418 4.03-8 9-8s8 3.582 8 7z"
+                />
+              </svg>
+            </div>
+            <h2
+              class="text-5xl font-bold mt-3"
+              style="color: var(--foreground)"
+            >
+              42
+            </h2>
+            <p
+              class="text-sm mt-2 font-medium"
+              style="color: oklch(0.75 0.16 150)"
+            >
+              +9 this week
+            </p>
+          </div>
+
+          <div class="card-modern interactive rounded-[var(--radius-lg)] p-6">
+            <div class="flex items-center justify-between">
+              <p class="text-sm" style="color: var(--muted-foreground)">
+                Collaborators
+              </p>
+              <svg
+                class="w-4 h-4"
+                style="color: var(--muted-foreground)"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 100-8 4 4 0 000 8zm6 1.13a4 4 0 00-2-3.44"
+                />
+              </svg>
+            </div>
+            <h2
+              class="text-3xl font-bold mt-3"
+              style="color: var(--foreground)"
+            >
+              8
+            </h2>
+            <p class="text-sm mt-2" style="color: var(--muted-foreground)">
+              2 pending requests
+            </p>
+          </div>
+
+          <div class="card-modern interactive rounded-[var(--radius-lg)] p-6">
+            <div class="flex items-center justify-between">
+              <p class="text-sm" style="color: var(--muted-foreground)">
+                Approved
+              </p>
+              <svg
+                class="w-4 h-4"
+                style="color: var(--muted-foreground)"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <h2
+              class="text-3xl font-bold mt-3"
+              style="color: var(--foreground)"
+            >
+              3
+            </h2>
+            <p class="text-sm mt-2" style="color: var(--muted-foreground)">
+              Published successfully
+            </p>
+          </div>
+
+          <div class="card-modern interactive rounded-[var(--radius-lg)] p-6">
+            <div class="flex items-center justify-between">
+              <p class="text-sm" style="color: var(--muted-foreground)">
+                Pending Review
+              </p>
+              <svg
+                class="w-4 h-4"
+                style="color: var(--muted-foreground)"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <h2
+              class="text-3xl font-bold mt-3"
+              style="color: var(--foreground)"
+            >
+              2
+            </h2>
+            <p class="text-sm mt-2" style="color: var(--muted-foreground)">
+              Waiting for approval
+            </p>
+          </div>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 space-y-6">
+            <div class="card-modern rounded-[var(--radius-lg)] p-6">
+              <div class="flex justify-between items-start">
+                <div>
+                  <h2
+                    class="text-xl font-semibold"
+                    style="color: var(--foreground)"
+                  >
+                    Quiz App
+                  </h2>
+                  <p class="mt-1" style="color: var(--muted-foreground)">
+                    Helping students prepare smarter.
+                  </p>
+                </div>
+                <span
+                  class="text-sm px-3 py-1 rounded-full font-medium"
+                  style="
+                    background: oklch(0.3 0.1 150);
+                    color: oklch(0.85 0.16 150);
+                  "
+                  >Approved</span
+                >
+              </div>
+              <div class="mt-8 flex gap-3">
+                <button
+                  class="px-4 py-2 rounded-[var(--radius-md)] text-sm font-medium glow-primary"
+                  style="
+                    background: var(--primary);
+                    color: var(--primary-foreground);
+                  "
+                >
+                  Edit Startup
+                </button>
+                <button
+                  class="px-4 py-2 rounded-[var(--radius-md)] text-sm font-medium"
+                  style="
+                    border: 1px solid var(--border);
+                    color: var(--foreground);
+                  "
+                >
+                  View Public Page
+                </button>
+              </div>
+            </div>
+
+            <div class="card-modern rounded-[var(--radius-lg)] p-6">
+              <div
+                class="section-header-with-count flex items-center justify-between mb-6"
+              >
+                <h2
+                  class="font-semibold text-xl"
+                  style="color: var(--foreground)"
+                >
+                  Recent Activity
+                </h2>
+                <button
+                  class="text-sm font-medium hover:underline"
+                  style="color: var(--primary-light)"
+                >
+                  View all
+                </button>
+              </div>
+              <div class="space-y-5">
+                <div class="flex gap-4">
+                  <div
+                    class="h-8 w-8 rounded-full flex items-center justify-center shrink-0"
+                    style="background: oklch(0.3 0.1 150)"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      style="color: oklch(0.85 0.16 150)"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="font-medium" style="color: var(--foreground)">
+                      Quiz App was approved
+                    </p>
+                    <p class="text-sm" style="color: var(--muted-foreground)">
+                      2 hours ago
+                    </p>
+                  </div>
+                </div>
+                <div class="flex gap-4">
+                  <div
+                    class="h-8 w-8 rounded-full flex items-center justify-center shrink-0"
+                    style="background: var(--accent)"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      style="color: var(--accent-foreground)"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8-1.297 0-2.53-.24-3.646-.673L3 21l1.673-4.354C4.24 15.53 4 14.297 4 13c0-4.418 4.03-8 9-8s8 3.582 8 7z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="font-medium" style="color: var(--foreground)">
+                      You received new feedback
+                    </p>
+                    <p class="text-sm" style="color: var(--muted-foreground)">
+                      Yesterday
+                    </p>
+                  </div>
+                </div>
+                <div class="flex gap-4">
+                  <div
+                    class="h-8 w-8 rounded-full flex items-center justify-center shrink-0"
+                    style="background: oklch(0.35 0.12 70)"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      style="color: oklch(0.9 0.15 70)"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="font-medium" style="color: var(--foreground)">
+                      David O. requested to collaborate
+                    </p>
+                    <p class="text-sm" style="color: var(--muted-foreground)">
+                      2 days ago
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="space-y-6"></div>
+        </div>
+      </div>
+
+      <!-- ========================= FEEDBACK ========================= -->
+      <div id="feedback" class="tab-content hidden">
+        <div class="card-modern rounded-[var(--radius-lg)] p-6">
+          <h2
+            class="text-2xl font-semibold mb-6"
+            style="color: var(--foreground)"
+          >
+            Feedback Received
+          </h2>
+          <div class="space-y-5">
+            <div
+              class="pb-5 flex gap-4"
+              style="border-bottom: 1px solid var(--border)"
+            >
+              <div
+                class="h-8 w-8 rounded-full flex items-center justify-center shrink-0 text-sm font-medium"
+                style="background: var(--muted); color: var(--muted-foreground)"
+              >
+                A
+              </div>
+              <div>
+                <h3 class="font-medium" style="color: var(--foreground)">
+                  Anonymous Student
+                </h3>
+                <p class="mt-1" style="color: var(--muted-foreground)">
+                  Love this idea. I'd definitely use it.
+                </p>
+              </div>
+            </div>
+            <div class="flex gap-4">
+              <div
+                class="h-8 w-8 rounded-full flex items-center justify-center shrink-0 text-sm font-medium"
+                style="background: var(--muted); color: var(--muted-foreground)"
+              >
+                S
+              </div>
+              <div>
+                <h3 class="font-medium" style="color: var(--foreground)">
+                  Sarah A.
+                </h3>
+                <p class="mt-1" style="color: var(--muted-foreground)">
+                  The onboarding flow could be simpler.
+                </p>
+              </div>
+            </div>
+            <!-- John D.'s comment moved to Collabs — see "Expressed Interest" there -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================= COLLABS ========================= -->
+      <div id="collabs" class="tab-content hidden">
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="card-modern rounded-[var(--radius-lg)] p-6">
+            <h2
+              class="text-xl font-semibold mb-5"
+              style="color: var(--foreground)"
+            >
+              Pending Requests
+            </h2>
+            <div
+              class="rounded-[var(--radius-md)] p-4"
+              style="border: 1px solid var(--border)"
+            >
+              <h3 class="font-medium" style="color: var(--foreground)">
+                David O.
+              </h3>
+              <p class="text-sm mt-1" style="color: var(--muted-foreground)">
+                UI/UX Designer
+              </p>
+              <div class="flex gap-2 mt-4">
+                <button
+                  class="px-4 py-2 rounded-[var(--radius-md)] text-sm font-medium"
+                  style="
+                    background: var(--primary);
+                    color: var(--primary-foreground);
+                  "
+                >
+                  Accept
+                </button>
+                <button
+                  class="px-4 py-2 rounded-[var(--radius-md)] text-sm font-medium"
+                  style="
+                    border: 1px solid var(--border);
+                    color: var(--foreground);
+                  "
+                >
+                  Decline
+                </button>
+              </div>
+            </div>
+
+            <!-- Expressed Interest: comment-originated, not yet a formal request.
+                 Assumption made here — kept separate from Pending Requests since it
+                 doesn't carry Accept/Decline semantics yet. Flag if you'd rather
+                 fold it straight into Pending Requests instead. -->
+            <h3
+              class="text-sm font-semibold mt-6 mb-3"
+              style="color: var(--muted-foreground)"
+            >
+              EXPRESSED INTEREST
+            </h3>
+            <div
+              class="rounded-[var(--radius-md)] p-4"
+              style="border: 1px dashed var(--border)"
+            >
+              <div class="flex justify-between items-start">
+                <div>
+                  <h3 class="font-medium" style="color: var(--foreground)">
+                    John D.
+                  </h3>
+                  <p
+                    class="text-sm mt-1"
+                    style="color: var(--muted-foreground)"
+                  >
+                    From a comment on Quiz App
+                  </p>
+                </div>
+              </div>
+              <p class="mt-3" style="color: var(--foreground)">
+                "I'd love to collaborate on this project."
+              </p>
+              <button
+                class="mt-3 text-sm font-medium hover:underline"
+                style="color: var(--primary-light)"
+              >
+                Start conversation →
+              </button>
+            </div>
+          </div>
+
+          <div class="card-modern rounded-[var(--radius-lg)] p-6">
+            <h2
+              class="text-xl font-semibold mb-5"
+              style="color: var(--foreground)"
+            >
+              Current Collaborators
+            </h2>
+            <div class="space-y-4">
+              <div
+                class="rounded-[var(--radius-md)] p-4"
+                style="
+                  border: 1px solid var(--border);
+                  color: var(--foreground);
+                "
+              >
+                Mary E. — Backend Developer
+              </div>
+              <div
+                class="rounded-[var(--radius-md)] p-4"
+                style="
+                  border: 1px solid var(--border);
+                  color: var(--foreground);
+                "
+              >
+                Sarah O. — Product Designer
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================= INNOVATIONS ========================= -->
+      <div id="innovations" class="tab-content hidden">
+        <div class="space-y-10">
+          <div>
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--foreground)"
+            >
+              🔥 Trending Innovations
+            </h2>
+            <div class="grid-wrapper">
+              <!-- ProductCard — swap this markup 1:1 for your real <ProductCard /> in Next.js -->
+              <article
+                class="card-modern interactive rounded-[var(--radius-lg)] overflow-hidden"
+              >
+                <div
+                  class="h-40 w-full"
+                  style="
+                    background: linear-gradient(
+                      135deg,
+                      var(--primary) 0%,
+                      var(--accent) 100%
+                    );
+                  "
+                ></div>
+                <div class="p-4">
+                  <h3 class="font-semibold" style="color: var(--foreground)">
+                    AI Study Assistant
+                  </h3>
+                  <p
+                    class="text-sm mt-2"
+                    style="color: var(--muted-foreground)"
+                  >
+                    Personalized revision plans generated from your course
+                    outline.
+                  </p>
+                  <div class="flex items-center justify-between mt-5">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="size-8 rounded-full flex items-center justify-center text-xs font-medium"
+                        style="
+                          background: var(--muted);
+                          color: var(--muted-foreground);
+                        "
+                      >
+                        C
+                      </div>
+                      <div>
+                        <p
+                          class="text-sm font-medium"
+                          style="color: var(--foreground)"
+                        >
+                          Chidera N.
+                        </p>
+                        <p
+                          class="text-xs"
+                          style="color: var(--muted-foreground)"
+                        >
+                          Computer Science
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      class="text-sm font-medium"
+                      style="color: var(--primary-light)"
+                      >▲ 128</span
+                    >
+                  </div>
+                  <div class="mt-6 flex flex-wrap gap-2">
+                    <span
+                      class="text-xs px-3 py-1 rounded-full"
+                      style="
+                        background: var(--secondary);
+                        color: var(--secondary-foreground);
+                      "
+                      >AI</span
+                    >
+                    <span
+                      class="text-xs px-3 py-1 rounded-full"
+                      style="
+                        background: var(--secondary);
+                        color: var(--secondary-foreground);
+                      "
+                      >EdTech</span
+                    >
+                  </div>
+                </div>
+                <div
+                  class="p-3 flex justify-end"
+                  style="border-top: 1px solid var(--border)"
+                >
+                  <button
+                    class="px-4 py-2 rounded-[var(--radius-md)] text-sm font-medium"
+                    style="
+                      background: var(--primary);
+                      color: var(--primary-foreground);
+                    "
+                  >
+                    View
+                  </button>
+                </div>
+              </article>
+
+              <article
+                class="card-modern interactive rounded-[var(--radius-lg)] overflow-hidden"
+              >
+                <div
+                  class="h-40 w-full"
+                  style="
+                    background: linear-gradient(
+                      135deg,
+                      var(--chart-2) 0%,
+                      var(--chart-4) 100%
+                    );
+                  "
+                ></div>
+                <div class="p-4">
+                  <h3 class="font-semibold" style="color: var(--foreground)">
+                    Campus Marketplace
+                  </h3>
+                  <p
+                    class="text-sm mt-2"
+                    style="color: var(--muted-foreground)"
+                  >
+                    Buy, sell, and swap between hostels without leaving campus.
+                  </p>
+                  <div class="flex items-center justify-between mt-5">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="size-8 rounded-full flex items-center justify-center text-xs font-medium"
+                        style="
+                          background: var(--muted);
+                          color: var(--muted-foreground);
+                        "
+                      >
+                        T
+                      </div>
+                      <div>
+                        <p
+                          class="text-sm font-medium"
+                          style="color: var(--foreground)"
+                        >
+                          Tobi A.
+                        </p>
+                        <p
+                          class="text-xs"
+                          style="color: var(--muted-foreground)"
+                        >
+                          Business Admin
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      class="text-sm font-medium"
+                      style="color: var(--primary-light)"
+                      >▲ 94</span
+                    >
+                  </div>
+                  <div class="mt-6 flex flex-wrap gap-2">
+                    <span
+                      class="text-xs px-3 py-1 rounded-full"
+                      style="
+                        background: var(--secondary);
+                        color: var(--secondary-foreground);
+                      "
+                      >Marketplace</span
+                    >
+                    <span
+                      class="text-xs px-3 py-1 rounded-full"
+                      style="
+                        background: var(--secondary);
+                        color: var(--secondary-foreground);
+                      "
+                      >Mobile</span
+                    >
+                  </div>
+                </div>
+                <div
+                  class="p-3 flex justify-end"
+                  style="border-top: 1px solid var(--border)"
+                >
+                  <button
+                    class="px-4 py-2 rounded-[var(--radius-md)] text-sm font-medium"
+                    style="
+                      background: var(--primary);
+                      color: var(--primary-foreground);
+                    "
+                  >
+                    View
+                  </button>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <div>
+            <h2
+              class="text-xl font-semibold mb-4"
+              style="color: var(--foreground)"
+            >
+              🤝 Looking For Teammates
+            </h2>
+            <div class="grid-wrapper">
+              <article
+                class="card-modern interactive rounded-[var(--radius-lg)] overflow-hidden"
+              >
+                <div
+                  class="h-40 w-full"
+                  style="
+                    background: linear-gradient(
+                      135deg,
+                      var(--chart-1) 0%,
+                      var(--chart-3) 100%
+                    );
+                  "
+                ></div>
+                <div class="p-4">
+                  <h3 class="font-semibold" style="color: var(--foreground)">
+                    Fintech Startup needs a React Developer
+                  </h3>
+                  <p
+                    class="text-sm mt-2"
+                    style="color: var(--muted-foreground)"
+                  >
+                    Escrow-based platform for informal social commerce. Remote,
+                    flexible hours.
+                  </p>
+                  <div class="flex items-center justify-between mt-5">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="size-8 rounded-full flex items-center justify-center text-xs font-medium"
+                        style="
+                          background: var(--muted);
+                          color: var(--muted-foreground);
+                        "
+                      >
+                        U
+                      </div>
+                      <div>
+                        <p
+                          class="text-sm font-medium"
+                          style="color: var(--foreground)"
+                        >
+                          Uche K.
+                        </p>
+                        <p
+                          class="text-xs"
+                          style="color: var(--muted-foreground)"
+                        >
+                          Team Lead
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      class="text-sm font-medium"
+                      style="color: var(--primary-light)"
+                      >▲ 41</span
+                    >
+                  </div>
+                  <div class="mt-6 flex flex-wrap gap-2">
+                    <span
+                      class="text-xs px-3 py-1 rounded-full"
+                      style="
+                        background: var(--secondary);
+                        color: var(--secondary-foreground);
+                      "
+                      >Fintech</span
+                    >
+                    <span
+                      class="text-xs px-3 py-1 rounded-full"
+                      style="
+                        background: var(--secondary);
+                        color: var(--secondary-foreground);
+                      "
+                      >Remote</span
+                    >
+                  </div>
+                </div>
+                <div
+                  class="p-3 flex justify-end"
+                  style="border-top: 1px solid var(--border)"
+                >
+                  <button
+                    class="px-4 py-2 rounded-[var(--radius-md)] text-sm font-medium"
+                    style="
+                      background: var(--primary);
+                      color: var(--primary-foreground);
+                    "
+                  >
+                    View
+                  </button>
+                </div>
+              </article>
+
+              <article
+                class="card-modern interactive rounded-[var(--radius-lg)] overflow-hidden"
+              >
+                <div
+                  class="h-40 w-full"
+                  style="
+                    background: linear-gradient(
+                      135deg,
+                      var(--chart-5) 0%,
+                      var(--primary) 100%
+                    );
+                  "
+                ></div>
+                <div class="p-4">
+                  <h3 class="font-semibold" style="color: var(--foreground)">
+                    MedTech Project needs a UI Designer
+                  </h3>
+                  <p
+                    class="text-sm mt-2"
+                    style="color: var(--muted-foreground)"
+                  >
+                    Patient triage app for campus clinics. Portfolio + Figma
+                    link required.
+                  </p>
+                  <div class="flex items-center justify-between mt-5">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="size-8 rounded-full flex items-center justify-center text-xs font-medium"
+                        style="
+                          background: var(--muted);
+                          color: var(--muted-foreground);
+                        "
+                      >
+                        A
+                      </div>
+                      <div>
+                        <p
+                          class="text-sm font-medium"
+                          style="color: var(--foreground)"
+                        >
+                          Amara O.
+                        </p>
+                        <p
+                          class="text-xs"
+                          style="color: var(--muted-foreground)"
+                        >
+                          Nursing Science
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      class="text-sm font-medium"
+                      style="color: var(--primary-light)"
+                      >▲ 27</span
+                    >
+                  </div>
+                  <div class="mt-6 flex flex-wrap gap-2">
+                    <span
+                      class="text-xs px-3 py-1 rounded-full"
+                      style="
+                        background: var(--secondary);
+                        color: var(--secondary-foreground);
+                      "
+                      >MedTech</span
+                    >
+                    <span
+                      class="text-xs px-3 py-1 rounded-full"
+                      style="
+                        background: var(--secondary);
+                        color: var(--secondary-foreground);
+                      "
+                      >Design</span
+                    >
+                  </div>
+                </div>
+                <div
+                  class="p-3 flex justify-end"
+                  style="border-top: 1px solid var(--border)"
+                >
+                  <button
+                    class="px-4 py-2 rounded-[var(--radius-md)] text-sm font-medium"
+                    style="
+                      background: var(--primary);
+                      color: var(--primary-foreground);
+                    "
+                  >
+                    View
+                  </button>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DESKTOP: standalone glass FAB, bottom-right -->
+    <div id="fab-desktop" class="hidden md:block fixed bottom-8 right-8 z-40">
+      <div
+        id="dial-desktop"
+        class="dial-closed flex flex-col items-end gap-3 mb-4"
+      >
+        <button
+          class="dial-btn glass-dark rounded-full pl-4 pr-5 py-3 flex items-center gap-2 text-sm font-medium"
+          style="color: var(--foreground); box-shadow: var(--shadow-lg)"
+        >
+          <span
+            class="h-8 w-8 rounded-full flex items-center justify-center text-xs"
+            style="background: var(--primary); color: var(--primary-foreground)"
+            >🚀</span
+          >
+          Submit New Innovation
+        </button>
+        <button
+          class="dial-btn glass-dark rounded-full pl-4 pr-5 py-3 flex items-center gap-2 text-sm font-medium"
+          style="color: var(--foreground); box-shadow: var(--shadow-lg)"
+        >
+          <span
+            class="h-8 w-8 rounded-full flex items-center justify-center text-xs"
+            style="
+              background: var(--secondary);
+              color: var(--secondary-foreground);
+            "
+            >✏️</span
+          >
+          Edit Profile
+        </button>
+        <button
+          class="dial-btn glass-dark rounded-full pl-4 pr-5 py-3 flex items-center gap-2 text-sm font-medium"
+          style="color: var(--foreground); box-shadow: var(--shadow-lg)"
+        >
+          <span
+            class="h-8 w-8 rounded-full flex items-center justify-center text-xs"
+            style="background: oklch(0.4 0.14 150); color: oklch(0.95 0.02 150)"
+            >📣</span
+          >
+          Publish Startup
+        </button>
+      </div>
+      <button
+        id="fab-toggle-desktop"
+        class="fab-toggle glass-dark glow-primary h-16 w-16 rounded-full flex items-center justify-center"
+        style="box-shadow: var(--shadow-xl)"
+      >
+        <svg
+          class="fab-icon w-7 h-7"
+          style="color: var(--foreground)"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 4v16m8-8H4"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <!-- MOBILE: floating glass dock, tabs + raised center FAB -->
+    <div
+      class="md:hidden fixed inset-x-0 bottom-0 z-40 pb-[env(safe-area-inset-bottom)]"
+    >
+      <div
+        id="dial-mobile"
+        class="dial-closed absolute bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 w-max"
+      >
+        <button
+          class="dial-btn glass-dark rounded-full pl-4 pr-5 py-3 flex items-center gap-2 text-sm font-medium whitespace-nowrap"
+          style="color: var(--foreground); box-shadow: var(--shadow-lg)"
+        >
+          <span
+            class="h-7 w-7 rounded-full flex items-center justify-center text-xs"
+            style="background: var(--primary); color: var(--primary-foreground)"
+            >🚀</span
+          >
+          Submit New Innovation
+        </button>
+        <button
+          class="dial-btn glass-dark rounded-full pl-4 pr-5 py-3 flex items-center gap-2 text-sm font-medium whitespace-nowrap"
+          style="color: var(--foreground); box-shadow: var(--shadow-lg)"
+        >
+          <span
+            class="h-7 w-7 rounded-full flex items-center justify-center text-xs"
+            style="
+              background: var(--secondary);
+              color: var(--secondary-foreground);
+            "
+            >✏️</span
+          >
+          Edit Profile
+        </button>
+        <button
+          class="dial-btn glass-dark rounded-full pl-4 pr-5 py-3 flex items-center gap-2 text-sm font-medium whitespace-nowrap"
+          style="color: var(--foreground); box-shadow: var(--shadow-lg)"
+        >
+          <span
+            class="h-7 w-7 rounded-full flex items-center justify-center text-xs"
+            style="background: oklch(0.4 0.14 150); color: oklch(0.95 0.02 150)"
+            >📣</span
+          >
+          Publish Startup
+        </button>
+      </div>
+
+      <div class="relative mx-4 mb-4">
+        <div
+          class="glass-dark rounded-full flex items-center justify-between px-4 py-3"
+          style="box-shadow: var(--shadow-xl)"
+        >
+          <div class="flex items-center gap-1">
+            <button
+              data-tab="overview"
+              class="mobile-tab-btn flex flex-col items-center gap-1 px-3 py-1 rounded-full text-xs font-medium"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                />
+              </svg>
+              Overview
+            </button>
+            <button
+              data-tab="feedback"
+              class="mobile-tab-btn flex flex-col items-center gap-1 px-3 py-1 rounded-full text-xs font-medium"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8-1.297 0-2.53-.24-3.646-.673L3 21l1.673-4.354C4.24 15.53 4 14.297 4 13c0-4.418 4.03-8 9-8s8 3.582 8 7z"
+                />
+              </svg>
+              Feedback
+            </button>
+          </div>
+
+          <div class="absolute left-1/2 -translate-x-1/2 -top-6">
+            <button
+              id="fab-toggle-mobile"
+              class="fab-toggle glass-dark glow-primary h-14 w-14 rounded-full flex items-center justify-center"
+              style="box-shadow: var(--shadow-xl)"
+            >
+              <svg
+                class="fab-icon w-6 h-6"
+                style="color: var(--foreground)"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <div class="flex items-center gap-1">
+            <button
+              data-tab="collabs"
+              class="mobile-tab-btn flex flex-col items-center gap-1 px-3 py-1 rounded-full text-xs font-medium"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 100-8 4 4 0 000 8zm6 1.13a4 4 0 00-2-3.44"
+                />
+              </svg>
+              Collabs
+            </button>
+            <button
+              data-tab="innovations"
+              class="mobile-tab-btn flex flex-col items-center gap-1 px-3 py-1 rounded-full text-xs font-medium"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
+              </svg>
+              Innovations
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="dial-scrim"
+      class="hidden fixed inset-0 z-30"
+      style="background: rgb(0 0 0 / 0.5)"
+    ></div>
+
+    <script>
+      const buttons = document.querySelectorAll(".tab-btn, .mobile-tab-btn");
+      const contents = document.querySelectorAll(".tab-content");
+      const indicator = document.getElementById("tab-indicator");
+      const track = document.getElementById("tab-track");
+      const mobileLabel = document.getElementById("mobile-tab-label");
+      const labels = {
+        overview: "Overview",
+        feedback: "Feedback",
+        collabs: "Collabs",
+        innovations: "Innovations",
+      };
+
+      function moveIndicator(tab) {
+        const btn = track.querySelector(`.tab-btn[data-tab="${tab}"]`);
+        if (!btn) return;
+        indicator.style.left = btn.offsetLeft + "px";
+        indicator.style.width = btn.offsetWidth + "px";
+      }
+
+      function activateTab(tab) {
+        contents.forEach((c) => c.classList.add("hidden"));
+        document.getElementById(tab)?.classList.remove("hidden");
+
+        buttons.forEach((b) => {
+          const active = b.dataset.tab === tab;
+          b.style.color = active
+            ? "var(--foreground)"
+            : "var(--muted-foreground)";
+        });
+
+        moveIndicator(tab);
+        mobileLabel.textContent = labels[tab] || "Overview";
+
+        const url = new URL(window.location);
+        url.searchParams.set("tab", tab);
+        window.history.replaceState({}, "", url);
+      }
+
+      buttons.forEach((b) =>
+        b.addEventListener("click", () => activateTab(b.dataset.tab)),
+      );
+      window.addEventListener("resize", () => {
+        const current =
+          new URLSearchParams(window.location.search).get("tab") || "overview";
+        moveIndicator(current);
+      });
+
+      const initialTab =
+        new URLSearchParams(window.location.search).get("tab") || "overview";
+      activateTab(initialTab);
+
+      function wireFab(toggleId, dialId) {
+        const toggle = document.getElementById(toggleId);
+        const dial = document.getElementById(dialId);
+        const scrim = document.getElementById("dial-scrim");
+        if (!toggle || !dial) return;
+
+        toggle.addEventListener("click", () => {
+          const isOpen = !dial.classList.contains("dial-closed");
+          dial.classList.toggle("dial-closed");
+          toggle.classList.toggle("fab-open");
+          scrim.classList.toggle("hidden", isOpen);
+        });
+
+        scrim.addEventListener("click", () => {
+          dial.classList.add("dial-closed");
+          toggle.classList.remove("fab-open");
+          scrim.classList.add("hidden");
+        });
+      }
+
+      wireFab("fab-toggle-desktop", "dial-desktop");
+      wireFab("fab-toggle-mobile", "dial-mobile");
+    </script>
+  </body>
+</html>

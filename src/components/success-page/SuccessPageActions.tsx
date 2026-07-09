@@ -10,7 +10,7 @@ export default function SuccessPageActions() {
           asChild
           className="h-12 rounded-xl px-6 text-sm font-medium inline-flex items-center"
         >
-          <Link href="/explore">Navigate to Dashboard</Link>
+          <Link href="/dashboard">Navigate to Dashboard</Link>
         </Button>
       </div>
 

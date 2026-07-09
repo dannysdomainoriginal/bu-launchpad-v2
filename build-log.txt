@@ -1,0 +1,42 @@
+
+> bu-launchpad@0.1.0 build
+> next build
+
+▲ Next.js 16.2.6 (Turbopack)
+- Environments: .env
+- Cache Components enabled
+- Experiments (use with caution):
+  · serverActions
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 81s
+  Running TypeScript ...
+  Finished TypeScript in 2.4min ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/21) ...
+  Generating static pages using 7 workers (5/21) 
+  Generating static pages using 7 workers (10/21) 
+  Generating static pages using 7 workers (15/21) 
+✓ Generating static pages using 7 workers (21/21) in 120s
+  Finalizing page optimization ...
+
+Route (app)              Revalidate  Expire
+┌ ○ /                           15m      1d
+├ ○ /_not-found
+├ ○ /dashboard
+├ ○ /explore                     1h      1d
+├ ◐ /products/[slug]            15m      1y
+│ ├ /products/[slug]            15m      1y
+│ ├ /products/teralearn         15m      1d
+│ ├ /products/arcade            15m      1d
+│ └ [+10 more paths]
+├ ◐ /submit
+└ ◐ /success/[slug]
+  └ /success/[slug]
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)             prerendered as static content
+◐  (Partial Prerender)  prerendered as static HTML with dynamic server-streamed content
+
