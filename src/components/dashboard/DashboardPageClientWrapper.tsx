@@ -1,10 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { z } from "zod";
 
 import CollabsTab from "@/components/dashboard/collabs-tab";
-import DashboardHeader from "@/components/dashboard/dashboard-header";
 import DashboardTabs from "@/components/dashboard/dashboard-tabs";
 import FeedbackTab from "@/components/dashboard/feedback-tab";
 import FloatingActionButton from "@/components/dashboard/floating-action-button";

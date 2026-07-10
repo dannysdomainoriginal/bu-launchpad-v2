@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 
 import DashboardPageClientWrapper from "./DashboardPageClientWrapper";
-import ProductSignInBox from "@/components/dashboard/ProductSignInBox";
+import DashboardSignInBox from "@/components/dashboard/DashboardSignInBox";
 import { getProductsByUserId } from "@/modules/products/products.service";
 import { getFeedbacksByUserId } from "@/modules/feedback/feedback.service";
 import { getCollaborationsByUserId } from "@/modules/collaboration/collaboration.service";
@@ -17,7 +17,7 @@ export default async function DashboardPageWrapper({
   const tab = DashboardTabSchema.safeParse(values.tab).data || "overview";
 
   if (!authContext.userId) {
-    return <ProductSignInBox />;
+    return <DashboardSignInBox />;
   }
 
   const [

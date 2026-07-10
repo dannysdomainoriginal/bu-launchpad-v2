@@ -11,7 +11,7 @@ export default function ProductOverviewCard({
   product,
 }: ProductOverviewCardProps) {
   return (
-    <Card className="card-modern rounded-[var(--radius-lg)] border-0 p-0">
+    <Card className="card-modern rounded-lg border-0 p-0">
       <CardContent className="p-6">
         <div className="flex items-start justify-between gap-4">
           <div>

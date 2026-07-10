@@ -45,7 +45,7 @@ export default function DashboardTabs({
               type="button"
               onClick={() => onSelectTab(tab.key)}
               className={cn(
-                "relative z-10 rounded-full px-5 py-2.5 text-sm font-medium transition-colors",
+                "cursor-pointer relative z-10 rounded-full px-5 py-2.5 text-sm font-medium transition-colors",
                 isActive
                   ? "bg-card text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground",
