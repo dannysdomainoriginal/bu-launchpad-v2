@@ -1,5 +1,4 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 import type { DashboardStat } from "@/components/dashboard/types";
 import {
   CheckCircle2,
@@ -27,10 +26,7 @@ export default function StatsCards({ stats }: StatsCardsProps) {
         return (
           <Card
             key={stat.id}
-            className={cn(
-              "card-modern interactive rounded-[var(--radius-lg)] border-0 p-0",
-              stat.span === "wide" && "lg:col-span-2",
-            )}
+            className="card-modern interactive rounded-lg border-0 p-0"
           >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">

@@ -1,8 +1,15 @@
-import { feedbackData } from "@/app/dashboard/_data/feedback";
-import FeedbackList from "@/components/dashboard/feedback-list";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MessageSquareText } from "lucide-react";
 
-export default function FeedbackTab() {
+import FeedbackList from "@/components/dashboard/feedback-list";
+import { EmptySlate } from "@/components/ui/EmptySlate";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { FeedbackItem } from "@/components/dashboard/types";
+
+type Props = {
+  feedbacks: FeedbackItem[];
+};
+
+export default function FeedbackTab({ feedbacks }: Props) {
   return (
     <Card className="card-modern rounded-lg border-0 p-0">
       <CardHeader className="px-6 pt-6">
@@ -11,7 +18,14 @@ export default function FeedbackTab() {
         </CardTitle>
       </CardHeader>
       <CardContent className="px-6 pb-6">
-        <FeedbackList feedback={feedbackData} />
+        {feedbacks.length > 0 ? (
+          <FeedbackList feedback={feedbacks} />
+        ) : (
+          <EmptySlate
+            message="There is no feedback for your products yet."
+            Icon={MessageSquareText}
+          />
+        )}
       </CardContent>
     </Card>
   );

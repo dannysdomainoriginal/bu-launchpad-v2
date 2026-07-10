@@ -13,6 +13,23 @@ const tabs: { key: DashboardTab; label: string }[] = [
   { key: "innovations", label: "Innovations" },
 ];
 
+export function DashboardTabsSkeleton() {
+  return (
+    <div className="mb-8 hidden md:block">
+      <div className="relative inline-flex gap-1 rounded-full bg-muted p-1.5">
+        {tabs.map((tab) => (
+          <span
+            key={tab.key}
+            className="relative z-10 rounded-full px-5 py-2.5 text-sm font-medium text-muted-foreground"
+          >
+            {tab.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardTabs({
   activeTab,
   onSelectTab,

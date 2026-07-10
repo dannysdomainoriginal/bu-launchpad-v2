@@ -1,12 +1,19 @@
-import {
-  collaboratorsData,
-  expressedInterestData,
-  pendingRequestsData,
-} from "@/app/dashboard/_data/collaborators";
-import CollaboratorList from "@/components/dashboard/collaborator-list";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { UsersRound } from "lucide-react";
 
-export default function CollabsTab() {
+import CollaboratorList from "@/components/dashboard/collaborator-list";
+import { EmptySlate } from "@/components/ui/EmptySlate";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type {
+  Collaborator,
+  PendingRequest,
+} from "@/components/dashboard/types";
+
+type Props = {
+  pendingRequests: PendingRequest[];
+  collaborators: Collaborator[];
+};
+
+export default function CollabsTab({ pendingRequests, collaborators }: Props) {
   return (
     <div className="grid gap-6 md:grid-cols-2">
       <Card className="card-modern rounded-lg border-0 p-0">
@@ -16,11 +23,18 @@ export default function CollabsTab() {
           </CardTitle>
         </CardHeader>
         <CardContent className="px-6 pb-6">
-          <CollaboratorList
-            pendingRequests={pendingRequestsData}
-            collaborators={[]}
-            expressedInterest={expressedInterestData}
-          />
+          {pendingRequests.length > 0 ? (
+            <CollaboratorList
+              pendingRequests={pendingRequests}
+              collaborators={[]}
+              expressedInterest={undefined}
+            />
+          ) : (
+            <EmptySlate
+              message="No collaboration requests yet."
+              Icon={UsersRound}
+            />
+          )}
         </CardContent>
       </Card>
 
@@ -31,11 +45,18 @@ export default function CollabsTab() {
           </CardTitle>
         </CardHeader>
         <CardContent className="px-6 pb-6">
-          <CollaboratorList
-            pendingRequests={[]}
-            collaborators={collaboratorsData}
-            expressedInterest={undefined}
-          />
+          {collaborators.length > 0 ? (
+            <CollaboratorList
+              pendingRequests={[]}
+              collaborators={collaborators}
+              expressedInterest={undefined}
+            />
+          ) : (
+            <EmptySlate
+              message="No collaborators on your launches yet."
+              Icon={UsersRound}
+            />
+          )}
         </CardContent>
       </Card>
     </div>

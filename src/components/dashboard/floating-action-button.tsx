@@ -48,7 +48,7 @@ export default function FloatingActionButton({
           <div
             className={cn(
               "mb-4 flex flex-col items-end gap-3",
-              isOpen ? "block" : "hidden",
+              isOpen ? "flex" : "hidden",
             )}
           >
             {actionItems.map((action) => {
@@ -90,7 +90,7 @@ export default function FloatingActionButton({
         <div
           className={cn(
             "mb-4 flex flex-col items-center gap-3",
-            isOpen ? "block" : "hidden",
+            isOpen ? "flex" : "hidden",
           )}
         >
           {actionItems.map((action) => {
