@@ -24,7 +24,7 @@ export default function RecentActivity({ activities }: RecentActivityProps) {
           variant="link"
           className="px-0 text-sm text-primary-light hover:no-underline"
         >
-          View all
+          View stats
         </Button>
       </CardHeader>
       <CardContent className="space-y-5 px-6 pb-6">

@@ -12,12 +12,7 @@ type Props = {
 export default function FeedbackTab({ feedbacks }: Props) {
   return (
     <Card className="card-modern rounded-lg border-0 p-0">
-      <CardHeader className="px-6 pt-6">
-        <CardTitle className="text-2xl font-semibold text-foreground">
-          Feedback Received
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="px-6 pb-6">
+      <CardContent className="px-6 py-6">
         {feedbacks.length > 0 ? (
           <FeedbackList feedback={feedbacks} />
         ) : (

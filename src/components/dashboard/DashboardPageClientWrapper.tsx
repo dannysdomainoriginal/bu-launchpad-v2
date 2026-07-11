@@ -80,7 +80,7 @@ export default function DashboardPageClientWrapper({
         value: counts.feedbackCount.toString(),
         meta:
           counts.feedbackCount > 0
-            ? `${counts.feedbackCount} received`
+            ? `Feedback${counts.feedbackCount > 1 ? "s" : ""} received`
             : "No feedback yet",
         icon: "feedback",
         span: "wide",
@@ -91,7 +91,7 @@ export default function DashboardPageClientWrapper({
         value: counts.collabCount.toString(),
         meta:
           counts.collabCount > 0
-            ? `${counts.collabCount} active requests`
+            ? `Active request${counts.collabCount > 1 ? "s" : ""}`
             : "No collaboration requests",
         icon: "collaborators",
       },

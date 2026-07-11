@@ -2,7 +2,7 @@ import { SignInButton } from "@clerk/nextjs";
 
 export default function DashboardSignInBox() {
   return (
-    <div className="mx-auto max-w-2xl rounded-3xl border border-border bg-background/90 px-8 py-8 text-center shadow-sm md:py-16">
+    <div className="max-w-2xl rounded-3xl border border-border bg-background/90 px-8 py-8 text-center shadow-sm md:py-16">
       <p className="text-lg font-semibold">Sign in to view your dashboard</p>
       <p className="mt-3 text-sm text-muted-foreground">
         You need to be signed in with Clerk to see your products, feedback, and
