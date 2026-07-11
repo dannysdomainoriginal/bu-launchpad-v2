@@ -1,131 +1,150 @@
 "use client";
 
-import { useMemo } from "react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { MessageSquareText, PencilLine, Rocket, Plus } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { LayoutGrid, X } from "lucide-react";
 
-interface FloatingActionButtonProps {
+import { dashboardActions } from "@/modules/dashboard/dashboard-actions";
+
+interface Props {
   isOpen: boolean;
   onToggle: () => void;
 }
 
-const actions = [
-  {
-    label: "Submit New Innovation",
-    icon: Rocket,
-    className: "bg-primary text-primary-foreground",
-  },
-  {
-    label: "Edit Profile",
-    icon: PencilLine,
-    className: "bg-secondary text-secondary-foreground",
-  },
-  {
-    label: "Publish Startup",
-    icon: MessageSquareText,
-    className: "bg-[oklch(0.4_0.14_150)] text-[oklch(0.95_0.02_150)]",
-  },
-];
-
 export default function FloatingActionButton({
   isOpen,
   onToggle,
-}: FloatingActionButtonProps) {
-  const actionItems = useMemo(() => actions, []);
-
+}: Props) {
   return (
-    <>
-      <div
-        className={cn(
-          "fixed inset-0 z-30 bg-black/50 transition-opacity duration-200 md:hidden",
-          isOpen ? "opacity-100" : "pointer-events-none opacity-0",
-        )}
-        onClick={onToggle}
-      />
-      <div className="hidden md:block">
-        <div className="fixed bottom-8 right-8 z-40">
-          <div
-            className={cn(
-              "mb-4 flex flex-col items-end gap-3",
-              isOpen ? "flex" : "hidden",
-            )}
-          >
-            {actionItems.map((action) => {
-              const Icon = action.icon;
-              return (
-                <button
-                  key={action.label}
-                  type="button"
-                  className="glass-dark flex items-center gap-2 rounded-full px-4 py-3 text-sm font-medium text-foreground shadow-lg"
-                >
-                  <span
-                    className={cn(
-                      "flex h-8 w-8 items-center justify-center rounded-full text-xs",
-                      action.className,
-                    )}
-                  >
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  {action.label}
-                </button>
-              );
-            })}
-          </div>
-          <Button
-            type="button"
-            size="icon"
-            onClick={onToggle}
-            className={cn(
-              "glass-dark glow-primary h-16 w-16 rounded-full border-0 shadow-xl",
-              isOpen && "rotate-45",
-            )}
-          >
-            <Plus className="h-7 w-7" />
-          </Button>
-        </div>
-      </div>
+    <div className="hidden md:block">
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onToggle}
+              className="
+                fixed
+                inset-0
+                z-40
+                bg-black/30
+                backdrop-blur-sm
+              "
+            />
 
-      <div className="fixed bottom-28 right-1/2 z-40 translate-x-1/2 md:hidden">
-        <div
-          className={cn(
-            "mb-4 flex flex-col items-center gap-3",
-            isOpen ? "flex" : "hidden",
-          )}
-        >
-          {actionItems.map((action) => {
-            const Icon = action.icon;
-            return (
-              <button
-                key={action.label}
-                type="button"
-                className="glass-dark flex items-center gap-2 rounded-full px-4 py-3 text-sm font-medium text-foreground shadow-lg"
-              >
-                <span
-                  className={cn(
-                    "flex h-7 w-7 items-center justify-center rounded-full text-xs",
-                    action.className,
-                  )}
-                >
-                  <Icon className="h-4 w-4" />
-                </span>
-                {action.label}
-              </button>
-            );
-          })}
-        </div>
-        <Button
-          type="button"
-          size="icon"
+            <motion.div
+              initial={{
+                opacity: 0,
+                y: 20,
+                scale: 0.95,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                scale: 1,
+              }}
+              exit={{
+                opacity: 0,
+                y: 20,
+                scale: 0.95,
+              }}
+              transition={{
+                type: "spring",
+                stiffness: 400,
+                damping: 30,
+              }}
+              className="
+                glass-panel
+                fixed
+                bottom-28
+                right-8
+                z-50
+                w-80
+                rounded-3xl
+                p-2
+              "
+            >
+              {dashboardActions.map((action) => {
+                const Icon = action.icon;
+
+                return (
+                  <button
+                    key={action.id}
+                    type="button"
+                    className="
+                      flex
+                      w-full
+                      items-center
+                      gap-4
+                      rounded-2xl
+                      px-4
+                      py-4
+                      text-left
+                      cursor-pointer
+                      transition-colors
+                      hover:bg-white/5
+                    "
+                  >
+                    <div
+                      className="
+                        flex
+                        h-10
+                        w-10
+                        items-center
+                        justify-center
+                        rounded-full
+                        bg-primary/15
+                        text-primary
+                      "
+                    >
+                      <Icon className="h-5 w-5" />
+                    </div>
+
+                    <span className="font-medium">
+                      {action.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      <div className="fixed bottom-8 right-8 z-50">
+        <button
           onClick={onToggle}
-          className={cn(
-            "glass-dark glow-primary h-14 w-14 rounded-full border-0 shadow-xl",
-            isOpen && "rotate-45",
-          )}
+          className="
+            glass-nav
+            flex
+            h-16
+            w-16
+            items-center
+            justify-center
+            rounded-full
+            transition-all
+            duration-300
+            hover:scale-105
+            cursor-pointer
+          "
         >
-          <Plus className="h-6 w-6" />
-        </Button>
+          <motion.div
+            animate={{
+              rotate: isOpen ? 90 : 0,
+            }}
+            transition={{
+              duration: 0.25,
+            }}
+          >
+            {isOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <LayoutGrid className="h-6 w-6" />
+            )}
+          </motion.div>
+        </button>
       </div>
-    </>
+    </div>
   );
 }

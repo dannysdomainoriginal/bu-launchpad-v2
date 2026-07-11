@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
-import { Manrope, Instrument_Sans } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
+import { Manrope, Instrument_Sans } from "next/font/google";
+
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 
 const manrope = Manrope({
   variable: "--font-manrope",

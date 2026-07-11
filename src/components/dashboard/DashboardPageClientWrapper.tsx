@@ -6,7 +6,9 @@ import CollabsTab from "@/components/dashboard/collabs-tab";
 import DashboardTabs from "@/components/dashboard/dashboard-tabs";
 import FeedbackTab from "@/components/dashboard/feedback-tab";
 import FloatingActionButton from "@/components/dashboard/floating-action-button";
-import InnovationsTab, { ProductWithTags } from "@/components/dashboard/innovations-tab";
+import InnovationsTab, {
+  ProductWithTags,
+} from "@/components/dashboard/innovations-tab";
 import MobileBottomNav from "@/components/dashboard/mobile-bottom-nav";
 import OverviewTab from "@/components/dashboard/overview-tab";
 import type {
@@ -15,13 +17,10 @@ import type {
   DashboardStat,
   DashboardTab,
   FeedbackItem,
-  InnovationItem,
   PendingRequest,
   ProductOverviewItem,
 } from "@/components/dashboard/types";
 import { DashboardTabSchemaType } from "@/modules/dashboard/dashboard.schema";
-
-
 
 type DashboardCounts = {
   feedbackCount: number;
@@ -251,8 +250,9 @@ export default function DashboardPageClientWrapper({
       />
       <MobileBottomNav
         activeTab={tab}
+        isFabOpen={isFabOpen}
         onSelectTab={handleTabChange}
-        onToggleFab={() => setIsFabOpen((value) => !value)}
+        onToggleFab={() => setIsFabOpen((v) => !v)}
       />
     </div>
   );

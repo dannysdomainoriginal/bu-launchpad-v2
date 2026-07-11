@@ -1,96 +1,308 @@
+"use client";
+
+import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
+import {
+  Home,
+  LayoutGrid,
+  MessageSquareText,
+  Sparkles,
+  UsersRound,
+  X,
+} from "lucide-react";
+
 import { cn } from "@/lib/utils";
 import type { DashboardTab } from "@/components/dashboard/types";
-import { Home, MessageSquareText, Sparkles, UsersRound } from "lucide-react";
+import { dashboardActions } from "@/modules/dashboard/dashboard-actions";
 
 interface MobileBottomNavProps {
   activeTab: DashboardTab;
+  isFabOpen: boolean;
   onSelectTab: (tab: DashboardTab) => void;
   onToggleFab: () => void;
 }
 
-const tabs: { key: DashboardTab; label: string; icon: typeof Home }[] = [
-  { key: "overview", label: "Overview", icon: Home },
-  { key: "feedback", label: "Feedback", icon: MessageSquareText },
-  { key: "collabs", label: "Collabs", icon: UsersRound },
-  { key: "innovations", label: "Innovations", icon: Sparkles },
+const navItems = [
+  {
+    key: "overview" as const,
+    label: "Home",
+    icon: Home,
+  },
+  {
+    key: "feedback" as const,
+    label: "Feedback",
+    icon: MessageSquareText,
+  },
+  {
+    key: "menu" as const,
+    label: "Menu",
+    icon: LayoutGrid,
+  },
+  {
+    key: "collabs" as const,
+    label: "Collabs",
+    icon: UsersRound,
+  },
+  {
+    key: "innovations" as const,
+    label: "Innovations",
+    icon: Sparkles,
+  },
 ];
 
 export default function MobileBottomNav({
   activeTab,
+  isFabOpen,
   onSelectTab,
   onToggleFab,
 }: MobileBottomNavProps) {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 pb-[env(safe-area-inset-bottom)] md:hidden">
-      <div className="relative mx-4 mb-4">
-        <div className="glass-dark flex items-center justify-between rounded-full px-4 py-3 shadow-xl">
-          <div className="flex items-center gap-1">
-            {tabs.slice(0, 2).map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.key;
-              return (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => onSelectTab(tab.key)}
-                  className={cn(
-                    "flex flex-col items-center gap-1 rounded-full px-3 py-1 text-[0.65rem] font-medium",
-                    isActive ? "text-foreground" : "text-muted-foreground",
-                  )}
-                >
-                  <Icon className="h-5 w-5" />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
+    <>
+      {/* ================= ACTION PANEL ================= */}
 
-          <div className="absolute left-1/2 top-[-1.3rem] -translate-x-1/2">
-            <button
-              type="button"
+      <AnimatePresence>
+        {isFabOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               onClick={onToggleFab}
-              className="glass-dark glow-primary flex h-14 w-14 items-center justify-center rounded-full shadow-xl"
-            >
-              <PlusIcon />
-            </button>
-          </div>
+              className="
+                fixed
+                inset-0
+                z-40
+                bg-black/40
+                backdrop-blur-sm
+                md:hidden
+              "
+            />
 
-          <div className="flex items-center gap-1">
-            {tabs.slice(2).map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.key;
+            <motion.div
+              initial={{
+                opacity: 0,
+                y: 20,
+                scale: 0.95,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                scale: 1,
+              }}
+              exit={{
+                opacity: 0,
+                y: 20,
+                scale: 0.95,
+              }}
+              transition={{
+                type: "spring",
+                stiffness: 400,
+                damping: 30,
+              }}
+              className="
+                glass-panel
+                fixed
+                bottom-28
+                left-1/2
+                z-50
+                w-[90%]
+                max-w-sm
+                -translate-x-1/2
+                rounded-3xl
+                p-2
+                md:hidden
+              "
+            >
+              {dashboardActions.map((action) => {
+                const Icon = action.icon;
+
+                return (
+                  <button
+                    key={action.id}
+                    type="button"
+                    className="
+                      flex
+                      w-full
+                      items-center
+                      gap-4
+                      rounded-2xl
+                      px-4
+                      py-4
+                      text-left
+                      transition-colors
+                      hover:bg-white/5
+                    "
+                  >
+                    <div
+                      className="
+                        flex
+                        h-10
+                        w-10
+                        items-center
+                        justify-center
+                        rounded-full
+                        bg-primary/15
+                        text-primary
+                      "
+                    >
+                      <Icon className="h-5 w-5" />
+                    </div>
+
+                    <span className="font-medium">{action.label}</span>
+                  </button>
+                );
+              })}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* ================= MOBILE NAV ================= */}
+
+      <div
+        className="
+          fixed
+          left-1/2
+          z-50
+          w-[92%]
+          max-w-md
+          -translate-x-1/2
+          md:hidden
+          safe-bottom
+        "
+      >
+        <LayoutGroup>
+          <div
+            className="
+              glass-nav
+              flex
+              items-center
+              rounded-full
+              p-2
+            "
+          >
+            {navItems.map((item) => {
+              const isMenu = item.key === "menu";
+
+              const isActive = isMenu
+                ? isFabOpen
+                : !isFabOpen && activeTab === item.key;
+
+              const Icon = item.icon;
+
               return (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => onSelectTab(tab.key)}
+                <motion.button
+                  key={item.key}
+                  layout
+                  transition={{
+                    type: "spring",
+                    stiffness: 450,
+                    damping: 32,
+                  }}
+                  onClick={() => {
+                    if (isMenu) {
+                      onToggleFab();
+                      return;
+                    }
+
+                    onSelectTab(item.key);
+                  }}
                   className={cn(
-                    "flex flex-col items-center gap-1 rounded-full px-3 py-1 text-[0.65rem] font-medium",
-                    isActive ? "text-foreground" : "text-muted-foreground",
+                    `
+                      relative
+                      flex
+                      h-12
+                      px-4
+                      items-center
+                      justify-center
+                      overflow-hidden
+                      rounded-full
+                      transition-colors
+                    `,
+                    isActive ? "w-auto px-4" : "flex-1",
+                    isActive ? "text-primary" : "text-muted-foreground",
                   )}
                 >
-                  <Icon className="h-5 w-5" />
-                  {tab.label}
-                </button>
+                  {isActive && (
+                    <motion.div
+  layoutId="active-pill"
+  className="
+    absolute
+    inset-0
+    rounded-full
+    bg-primary/15
+  "
+  transition={{
+    type: "spring",
+    stiffness: 450,
+    damping: 32,
+  }}
+/>
+                  )}
+
+                  <div
+                    className="
+                      relative
+                      z-10
+                      flex
+                      items-center
+                      gap-2
+                    "
+                  >
+                    {isMenu ? (
+                      <motion.div
+                        animate={{
+                          rotate: isFabOpen ? 90 : 0,
+                        }}
+                        transition={{
+                          duration: 0.25,
+                        }}
+                      >
+                        {isFabOpen ? (
+                          <X className="h-5 w-5 shrink-0" />
+                        ) : (
+                          <LayoutGrid className="h-5 w-5 shrink-0" />
+                        )}
+                      </motion.div>
+                    ) : (
+                      <Icon className="h-5 w-5 shrink-0" />
+                    )}
+
+                    <AnimatePresence initial={false}>
+                      {isActive && (
+                        <motion.span
+                          initial={{
+                            opacity: 0,
+                            width: 0,
+                          }}
+                          animate={{
+                            opacity: 1,
+                            width: "auto",
+                          }}
+                          exit={{
+                            opacity: 0,
+                            width: 0,
+                          }}
+                          transition={{
+                            duration: 0.2,
+                          }}
+                          className="
+                            overflow-hidden
+                            whitespace-nowrap
+                            text-sm
+                            font-medium
+                          "
+                        >
+                          {item.label}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </motion.button>
               );
             })}
           </div>
-        </div>
+        </LayoutGroup>
       </div>
-    </div>
-  );
-}
-
-function PlusIcon() {
-  return (
-    <svg
-      className="h-6 w-6 text-foreground"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-    </svg>
+    </>
   );
 }
