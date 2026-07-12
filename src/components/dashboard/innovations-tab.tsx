@@ -2,26 +2,7 @@ import { Sparkles } from "lucide-react";
 
 import ProductCard from "@/modules/products/components/ProductCard";
 import { EmptySlate } from "@/components/ui/EmptySlate";
-
-export type ProductWithTags = {
-  id: string;
-  name: string;
-  tagline: string;
-  slug: string;
-  description: string;
-  isFeatured: boolean;
-  isApproved: boolean;
-  image: string;
-  liveUrl: string | null;
-  voteCount: number;
-  authorId: string;
-  organizationId: string | null;
-  authorName: string;
-  authorAvatar: string;
-  createdAt: Date;
-  updatedAt: Date;
-  tags: { name: string }[];
-};
+import { ProductWithTags } from "./types";
 
 type Props = {
   products: ProductWithTags[];

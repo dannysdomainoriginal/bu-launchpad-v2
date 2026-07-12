@@ -1,8 +1,5 @@
-"use server";
-
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { cacheTag } from "next/cache";
-import { auth } from "@clerk/nextjs/server";
 
 import { db } from "@/lib/db";
 import { productCollaboration, products } from "@/lib/db/schema";
@@ -65,19 +62,6 @@ export async function checkCollaborationRequestStatus(
     .limit(1);
 
   return Boolean(existing);
-}
-
-/* -------------------------------------------------------------------------- */
-/*                          GET COLLAB REQUEST STATUS                         */
-/* -------------------------------------------------------------------------- */
-export async function getCollaborationRequestStatus(productId: string) {
-  const { userId } = await auth();
-
-  if (!userId) {
-    return false;
-  }
-
-  return checkCollaborationRequestStatus(productId, userId);
 }
 
 /* -------------------------------------------------------------------------- */

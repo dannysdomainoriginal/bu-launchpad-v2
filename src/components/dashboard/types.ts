@@ -17,12 +17,14 @@ export interface ActivityItem {
   icon: "approved" | "feedback" | "collab";
 }
 
-export interface FeedbackItem {
+export type FeedbackItem = {
   id: string;
   author: string;
+  avatar: string | null;
   message: string;
-  initials: string;
-}
+  createdAt: Date;
+  productName: string;
+};
 
 export interface PendingRequest {
   id: string;
@@ -36,22 +38,52 @@ export interface Collaborator {
   role: string;
 }
 
-export interface InnovationItem {
-  id: string;
-  title: string;
-  description: string;
-  authorName: string;
-  authorRole: string;
-  votes: number;
-  tags: string[];
-  accent: "primary" | "blue" | "orange" | "pink";
-}
-
-export interface ProductOverviewItem {
+export type ProductWithTags = {
   id: string;
   name: string;
   tagline: string;
-  status: string;
-  ctaPrimary: string;
-  ctaSecondary: string;
-}
+  slug: string;
+  description: string;
+  isFeatured: boolean;
+  isApproved: boolean;
+  image: string;
+  liveUrl: string | null;
+  voteCount: number;
+  authorId: string;
+  organizationId: string | null;
+  authorName: string;
+  authorAvatar: string;
+  createdAt: Date;
+  updatedAt: Date;
+  tags: { name: string }[];
+};
+
+export type DashboardEvent = {
+  id: string;
+  userId: string;
+  type:
+    | "product_created"
+    | "feedback_created"
+    | "collab_request_created"
+    | "collab_request_accepted"
+    | "product_approved"
+    | "product_rejected";
+
+  actorId: string | null;
+  actorName: string | null;
+  actorAvatar: string | null;
+
+  entityId: string | null;
+  entityType: string | null;
+
+  metadata: {
+    productId?: string;
+    productName?: string;
+    productSlug?: string;
+    preview?: string;
+    reason?: string;
+  } | null;
+
+  readAt: Date | null;
+  createdAt: Date;
+};

@@ -34,17 +34,17 @@ export async function getFeedbacksByUserId(userId: string) {
   cacheTag(`feedbacks:user-id:${userId}`);
 
   return await db
-    .select()
+    .select({
+      id: productFeedback.id,
+      author: productFeedback.userName,
+      avatar: productFeedback.userAvatar,
+      message: productFeedback.message,
+      createdAt: productFeedback.createdAt,
+      productName: products.name,
+    })
     .from(productFeedback)
-    .where(
-      inArray(
-        productFeedback.productId,
-        db
-          .select({ id: products.id })
-          .from(products)
-          .where(eq(products.authorId, userId)),
-      ),
-    )
+    .innerJoin(products, eq(productFeedback.productId, products.id))
+    .where(eq(products.authorId, userId))
     .orderBy(desc(productFeedback.createdAt))
     .limit(20);
 }

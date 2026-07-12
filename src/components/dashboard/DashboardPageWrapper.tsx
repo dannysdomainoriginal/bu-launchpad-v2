@@ -7,6 +7,7 @@ import { getFeedbacksByUserId } from "@/modules/feedback/feedback.service";
 import { getCollaborationsByUserId } from "@/modules/collaboration/collaboration.service";
 import { DashboardTabSchema } from "@/modules/dashboard/dashboard.schema";
 import { getUserDashboardCounts } from "@/modules/dashboard/dashboard.service";
+import { getEventsByUserId } from "@/modules/events/events.service";
 
 export default async function DashboardPageWrapper({
   searchParams,
@@ -25,11 +26,13 @@ export default async function DashboardPageWrapper({
     userInnovations,
     userFeedbacks,
     userCollaborations,
+    userEvents,
   ] = await Promise.all([
     getUserDashboardCounts(authContext.userId),
     getProductsByUserId(authContext.userId, {}),
     getFeedbacksByUserId(authContext.userId),
     getCollaborationsByUserId(authContext.userId),
+    getEventsByUserId(authContext.userId),
   ]);
 
   return (
@@ -39,6 +42,7 @@ export default async function DashboardPageWrapper({
       products={userInnovations}
       feedbacks={userFeedbacks}
       collaborations={userCollaborations}
+      events={userEvents}
     />
   );
 }

@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import DashboardPageWrapper from "@/components/dashboard/DashboardPageWrapper";
 import { DashboardTabsSkeleton } from "@/components/dashboard/dashboard-tabs";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { MobileBottomNavSkeleton } from "@/components/dashboard/MobileBottomNavSkeleton";
 
 export default function DashboardPage({
   searchParams,
@@ -25,6 +26,7 @@ export default function DashboardPage({
           fallback={
             <div>
               <DashboardTabsSkeleton />
+              <MobileBottomNavSkeleton />
             </div>
           }
         >

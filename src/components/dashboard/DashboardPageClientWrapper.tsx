@@ -2,24 +2,22 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import CollabsTab from "@/components/dashboard/collabs-tab";
-import DashboardTabs from "@/components/dashboard/dashboard-tabs";
-import FeedbackTab from "@/components/dashboard/feedback-tab";
-import FloatingActionButton from "@/components/dashboard/floating-action-button";
-import InnovationsTab, {
-  ProductWithTags,
-} from "@/components/dashboard/innovations-tab";
-import MobileBottomNav from "@/components/dashboard/mobile-bottom-nav";
-import OverviewTab from "@/components/dashboard/overview-tab";
+import CollabsTab from "./collabs-tab";
+import DashboardTabs from "./dashboard-tabs";
+import FeedbackTab from "./feedback-tab";
+import FloatingActionButton from "./floating-action-button";
+import InnovationsTab from "./innovations-tab";
+import MobileBottomNav from "./mobile-bottom-nav";
+import OverviewTab from "./overview-tab";
 import type {
-  ActivityItem,
   Collaborator,
+  DashboardEvent,
   DashboardStat,
   DashboardTab,
   FeedbackItem,
   PendingRequest,
-  ProductOverviewItem,
-} from "@/components/dashboard/types";
+  ProductWithTags,
+} from "./types";
 import { DashboardTabSchemaType } from "@/modules/dashboard/dashboard.schema";
 
 type DashboardCounts = {
@@ -27,13 +25,6 @@ type DashboardCounts = {
   collabCount: number;
   approvedProductCount: number;
   pendingProductCount: number;
-};
-
-type DashboardFeedbackSummary = {
-  id: string;
-  message: string;
-  userName?: string | null;
-  createdAt?: Date | string | null;
 };
 
 type DashboardCollaborationSummary = {
@@ -47,8 +38,9 @@ type Props = {
   initialTab: DashboardTabSchemaType;
   counts: DashboardCounts;
   products: ProductWithTags[];
-  feedbacks: DashboardFeedbackSummary[];
+  feedbacks: FeedbackItem[];
   collaborations: DashboardCollaborationSummary[];
+  events: DashboardEvent[];
 };
 
 const tabLabels: Record<DashboardTab, string> = {
@@ -64,6 +56,7 @@ export default function DashboardPageClientWrapper({
   products,
   feedbacks,
   collaborations,
+  events,
 }: Props) {
   const [tab, setTab] = useState<DashboardTab>(initialTab);
   const [isFabOpen, setIsFabOpen] = useState(false);
@@ -118,68 +111,6 @@ export default function DashboardPageClientWrapper({
     ];
   }, [counts]);
 
-  const productOverview = useMemo<ProductOverviewItem | null>(() => {
-    const firstProduct = products[0];
-
-    if (!firstProduct) {
-      return null;
-    }
-
-    return {
-      id: firstProduct.id,
-      name: firstProduct.name,
-      tagline: firstProduct.tagline ?? "A fresh idea for the community.",
-      status: "Approved",
-      ctaPrimary: "Edit Startup",
-      ctaSecondary: "View Public Page",
-    };
-  }, [products]);
-
-  const activities = useMemo<ActivityItem[]>(() => {
-    const items: ActivityItem[] = [];
-
-    if (counts.approvedProductCount > 0) {
-      items.push({
-        id: "approved",
-        title: `${counts.approvedProductCount} startup${counts.approvedProductCount > 1 ? "s" : ""} approved`,
-        detail: "Ready to share with the community",
-        time: "Recently",
-        icon: "approved",
-      });
-    }
-
-    if (counts.feedbackCount > 0) {
-      items.push({
-        id: "feedback",
-        title: `${counts.feedbackCount} new feedback item${counts.feedbackCount > 1 ? "s" : ""}`,
-        detail: "Keep the conversation going",
-        time: "Recently",
-        icon: "feedback",
-      });
-    }
-
-    if (counts.collabCount > 0) {
-      items.push({
-        id: "collab",
-        title: `${counts.collabCount} collaborator request${counts.collabCount > 1 ? "s" : ""}`,
-        detail: "Great opportunities to grow together",
-        time: "Recently",
-        icon: "collab",
-      });
-    }
-
-    return items;
-  }, [counts]);
-
-  const feedbackItems = useMemo<FeedbackItem[]>(() => {
-    return feedbacks.map((feedback) => ({
-      id: feedback.id,
-      author: feedback.userName ?? "Community member",
-      message: feedback.message,
-      initials: (feedback.userName ?? "C").charAt(0).toUpperCase(),
-    }));
-  }, [feedbacks]);
-
   const pendingRequests = useMemo<PendingRequest[]>(() => {
     return collaborations.map((collaboration) => ({
       id: collaboration.id,
@@ -210,7 +141,8 @@ export default function DashboardPageClientWrapper({
   const renderTabContent = () => {
     switch (tab) {
       case "feedback":
-        return <FeedbackTab feedbacks={feedbackItems} />;
+        return <FeedbackTab feedbacks={feedbacks} />;
+
       case "collabs":
         return (
           <CollabsTab
@@ -218,16 +150,12 @@ export default function DashboardPageClientWrapper({
             collaborators={collaborators}
           />
         );
+
       case "innovations":
         return <InnovationsTab products={products} />;
+
       default:
-        return (
-          <OverviewTab
-            stats={stats}
-            productOverview={productOverview}
-            activities={activities}
-          />
-        );
+        return <OverviewTab stats={stats} events={events} />;
     }
   };
 
@@ -243,11 +171,11 @@ export default function DashboardPageClientWrapper({
 
       {renderTabContent()}
 
-      {/* Floating Menu Feature */}
       <FloatingActionButton
         isOpen={isFabOpen}
         onToggle={() => setIsFabOpen((value) => !value)}
       />
+
       <MobileBottomNav
         activeTab={tab}
         isFabOpen={isFabOpen}

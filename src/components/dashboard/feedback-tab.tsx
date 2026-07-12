@@ -14,7 +14,7 @@ export default function FeedbackTab({ feedbacks }: Props) {
     <Card className="card-modern rounded-lg border-0 p-0">
       <CardContent className="px-6 py-6">
         {feedbacks.length > 0 ? (
-          <FeedbackList feedback={feedbacks} />
+          <FeedbackList feedbacks={feedbacks} />
         ) : (
           <EmptySlate
             message="There is no feedback for your products yet."

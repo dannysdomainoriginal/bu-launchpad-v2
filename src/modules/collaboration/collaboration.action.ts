@@ -6,7 +6,10 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { handleCollaborationEmail } from "@/modules/mail";
 
 import { createCollaborationRequestSchema } from "./collaboration.schema";
-import { insertCollaborationRequest } from "./collaboration.service";
+import {
+  insertCollaborationRequest,
+  checkCollaborationRequestStatus,
+} from "./collaboration.service";
 
 type FormState = {
   success: boolean;
@@ -99,4 +102,17 @@ export async function addCollaborationRequestAction(
       message: "Failed to submit collaboration request.",
     };
   }
+}
+
+/* -------------------------------------------------------------------------- */
+/*                          GET COLLAB REQUEST STATUS                         */
+/* -------------------------------------------------------------------------- */
+export async function getCollaborationRequestStatus(productId: string) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return false;
+  }
+
+  return checkCollaborationRequestStatus(productId, userId);
 }
