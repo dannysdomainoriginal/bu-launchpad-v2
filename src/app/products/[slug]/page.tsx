@@ -17,7 +17,7 @@ type Props = {
 
 export default function ProductDetailsPage({ params }: Props) {
   return (
-    <main className="pb-8 sm:pb-10 pt-15 px-4 sm:px-6 lg:px-8 wrapper">
+    <main className="pb-8 sm:pb-10 pt-7 sm:pt-15 px-4 sm:px-6 lg:px-8 wrapper">
       <Suspense fallback={<ProductDetailsSkeleton />}>
         <ProductDetailsWrapper params={params} />
       </Suspense>

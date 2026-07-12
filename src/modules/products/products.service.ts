@@ -185,7 +185,7 @@ export async function getAllProductsWithTags({
 }: GetAllProductsParams) {
   "use cache";
   cacheLife("hours");
-  cacheTag("products:list:with-tags");
+  cacheTag("products:list");
 
   return await db.query.products.findMany({
     where: (products, { eq }) => eq(products.isApproved, true),
@@ -212,7 +212,7 @@ type SimilarProductIdRow = {
 export async function getSimilarProducts(productId: string, tags: string[]) {
   "use cache";
   cacheLife("hours");
-  cacheTag(`product:similar:${productId}`);
+  cacheTag(`products:similar:${productId}`);
 
   if (!tags.length) {
     return [];
@@ -246,6 +246,34 @@ export async function getSimilarProducts(productId: string, tags: string[]) {
   return db.query.products.findMany({
     where: (products, { and, inArray, eq }) =>
       and(inArray(products.id, productIds), eq(products.isApproved, true)),
+    with: {
+      tags: {
+        columns: {
+          name: true,
+        },
+      },
+    },
+  });
+}
+
+/* -------------------------------------------------------------------------- */
+/*                           GET PRODUCTS BY USER ID                          */
+/* -------------------------------------------------------------------------- */
+export async function getProductsByUserId(
+  userId: string,
+  { limit = 50, offset = 0 }: GetAllProductsParams,
+) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(`products:list`);
+  cacheTag(`products:user-id:${userId}`);
+
+  return await db.query.products.findMany({
+    where: (products, { eq, and }) =>
+      and(eq(products.authorId, userId), eq(products.isApproved, true)),
+    orderBy: (products, { desc }) => [desc(products.createdAt)],
+    limit,
+    offset,
     with: {
       tags: {
         columns: {

@@ -1,0 +1,26 @@
+
+> bu-launchpad@0.1.0 build
+> next build
+
+▲ Next.js 16.2.6 (Turbopack)
+- Environments: .env
+- Cache Components enabled
+- Experiments (use with caution):
+  · serverActions
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 48s
+  Running TypeScript ...
+Failed to type check.
+
+./src/components/dashboard/dashboard-page-client.tsx:54:17
+Type error: Property 'feedbacks' is missing in type '{}' but required in type 'Props'.
+
+  [90m52 |[0m     [36mswitch[0m (activeTab) {
+  [90m53 |[0m       [36mcase[0m [32m"feedback"[0m:
+[31m[1m>[0m [90m54 |[0m         [36mreturn[0m <[33mFeedbackTab[0m />;
+  [90m   |[0m                 [31m[1m^[0m
+  [90m55 |[0m       [36mcase[0m [32m"collabs"[0m:
+  [90m56 |[0m         [36mreturn[0m <[33mCollabsTab[0m />;
+  [90m57 |[0m       [36mcase[0m [32m"innovations"[0m:
+Next.js build worker exited with code: 1 and signal: null

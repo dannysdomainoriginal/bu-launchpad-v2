@@ -1,12 +1,12 @@
-"use server";
-
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { cacheTag } from "next/cache";
-import { auth } from "@clerk/nextjs/server";
 
 import { db } from "@/lib/db";
-import { productCollaboration } from "@/lib/db/schema";
+import { productCollaboration, products } from "@/lib/db/schema";
 
+/* -------------------------------------------------------------------------- */
+/*                            INSERT COLLAB REQUEST                           */
+/* -------------------------------------------------------------------------- */
 export async function insertCollaborationRequest(data: {
   id: string;
   productId: string;
@@ -34,6 +34,18 @@ export async function insertCollaborationRequest(data: {
   return true;
 }
 
+/* -------------------------------------------------------------------------- */
+/*                            DELETE COLLAB REQUEST                           */
+/* -------------------------------------------------------------------------- */
+export async function deleteCollaborationRequestById(requestId: string) {
+  return db
+    .delete(productCollaboration)
+    .where(eq(productCollaboration.id, requestId));
+}
+
+/* -------------------------------------------------------------------------- */
+/*                         CHECK COLLAB REQUEST STATUS                        */
+/* -------------------------------------------------------------------------- */
 export async function checkCollaborationRequestStatus(
   productId: string,
   userId: string,
@@ -52,18 +64,12 @@ export async function checkCollaborationRequestStatus(
   return Boolean(existing);
 }
 
-export async function getCollaborationRequestStatus(productId: string) {
-  const { userId } = await auth();
-
-  if (!userId) {
-    return false;
-  }
-
-  return checkCollaborationRequestStatus(productId, userId);
-}
-
+/* -------------------------------------------------------------------------- */
+/*                      GET COLLAB REQUEST BY PRODUCT ID                      */
+/* -------------------------------------------------------------------------- */
 export async function getProductCollaborationRequests(productId: string) {
   "use cache";
+  cacheTag("collaborations:list");
   cacheTag(`collaboration:product:${productId}`);
 
   return db
@@ -73,8 +79,26 @@ export async function getProductCollaborationRequests(productId: string) {
     .orderBy(desc(productCollaboration.createdAt));
 }
 
-export async function deleteCollaborationRequestById(requestId: string) {
-  return db
-    .delete(productCollaboration)
-    .where(eq(productCollaboration.id, requestId));
+/* -------------------------------------------------------------------------- */
+/*                       GET COLLAB REQUESTS BY USER ID                       */
+/* -------------------------------------------------------------------------- */
+export async function getCollaborationsByUserId(userId: string) {
+  "use cache";
+  cacheTag("collaborations:list");
+  cacheTag(`collaborations:user-id:${userId}`);
+
+  return await db
+    .select()
+    .from(productCollaboration)
+    .where(
+      inArray(
+        productCollaboration.productId,
+        db
+          .select({ id: products.id })
+          .from(products)
+          .where(eq(products.authorId, userId)),
+      ),
+    )
+    .orderBy(desc(productCollaboration.createdAt))
+    .limit(20);
 }

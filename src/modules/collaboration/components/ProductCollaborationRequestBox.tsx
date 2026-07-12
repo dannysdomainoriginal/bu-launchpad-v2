@@ -7,8 +7,10 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { addCollaborationRequestAction } from "@/modules/collaboration/collaboration.action";
-import { getCollaborationRequestStatus } from "@/modules/collaboration/collaboration.service";
+import {
+  addCollaborationRequestAction,
+  getCollaborationRequestStatus,
+} from "@/modules/collaboration/collaboration.action";
 
 type Props = {
   productId: string;

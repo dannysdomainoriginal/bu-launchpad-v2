@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, SearchXIcon } from "lucide-react";
+import { ArrowRight, SearchXIcon } from "lucide-react";
 
 export default function ProductDetailsNotFoundPage() {
   return (
@@ -25,11 +25,11 @@ export default function ProductDetailsNotFoundPage() {
         </Link>
 
         <Link
-          href="/"
-          className="inline-flex items-center justify-center rounded-xl border border-border bg-background px-5 py-3 text-sm font-medium text-foreground transition hover:border-primary/60"
+          href="/dashboard"
+          className="group inline-flex items-center justify-center rounded-xl border border-border bg-background px-5 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted/50"
         >
-          <ArrowLeft className="mr-2 h-4 w-4" />
           Home
+          <ArrowRight className="ml-1.5 h-4 w-4 transition-all duration-300 group-hover:translate-x-1" />
         </Link>
       </div>
     </main>
