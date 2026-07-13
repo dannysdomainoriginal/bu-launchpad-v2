@@ -57,7 +57,7 @@ export async function getRecentlyUploaded() {
 /* -------------------------------------------------------------------------- */
 export async function getProductBySlug(slug: string) {
   "use cache";
-  cacheTag(`product:single:${slug}`);
+  cacheTag(`product:by-slug:${slug}`);
 
   const product = await db.query.products.findFirst({
     where: (products, { eq, and }) =>
@@ -79,9 +79,30 @@ export async function getProductBySlug(slug: string) {
 }
 
 /* -------------------------------------------------------------------------- */
+/*                        GET METADATA DETAILS BY SLUG                        */
+/* -------------------------------------------------------------------------- */
+export async function getMetadataProduct(slug: string) {
+  "use cache";
+  cacheTag(`product:by-slug:${slug}`);
+
+  return db.query.products.findFirst({
+    where: (products, { eq, and }) =>
+      and(eq(products.slug, slug), eq(products.isApproved, true)),
+    columns: {
+      name: true,
+      description: true,
+      image: true,
+    },
+  });
+}
+
+/* -------------------------------------------------------------------------- */
 /*                    GET PRODUCT DETAILS FOR SUCCESS PAGE                    */
 /* -------------------------------------------------------------------------- */
 export async function getProductDetailsBySlug(slug: string) {
+  "use cache";
+  cacheTag(`product:by-slug:${slug}`);
+
   return db.query.products.findFirst({
     where: (products, { eq }) => eq(products.slug, slug),
     columns: {
@@ -145,7 +166,7 @@ export async function approveProduct(id: string) {
 
   revalidateTag("products:list", "max");
   revalidateTag("recently-launched", "max");
-  revalidateTag(`product:single:${updatedProduct.slug}`, "max");
+  revalidateTag(`product:by-slug:${updatedProduct.slug}`, "max");
   refresh();
 }
 

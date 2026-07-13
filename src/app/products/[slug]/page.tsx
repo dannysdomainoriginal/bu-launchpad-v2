@@ -8,21 +8,14 @@ import { db } from "@/lib/db";
 import { products } from "@/lib/db/schema";
 import type { Metadata } from "next";
 import { eq } from "drizzle-orm";
+import { getMetadataProduct } from "@/modules/products/products.service";
 
 /* -------------------------------------------------------------------------- */
 /*                              GENERATE METADATA                             */
 /* -------------------------------------------------------------------------- */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-
-  const product = await db.query.products.findFirst({
-    where: eq(products.slug, slug),
-    columns: {
-      name: true,
-      description: true,
-      image: true,
-    },
-  });
+  const product = await getMetadataProduct(slug);
 
   if (!product) {
     return {
@@ -53,6 +46,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
   };
 }
+
+/* -------------------------------------------------------------------------- */
+/*                        STATIC METADATA FOR STREAMING                       */
+/* -------------------------------------------------------------------------- */
+export const metadata: Metadata = {
+  title: "BU Launchpad",
+  description: "Discover student-built startups on BU Launchpad.",
+};
 
 /* -------------------------------------------------------------------------- */
 /*                           GENERATE STATIC PARAMS                           */
