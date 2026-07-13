@@ -38,12 +38,21 @@ export const metadata: Metadata = {
       "Built by students.\nPowered by ideas.\nShowcase your projects, discover what others are building, turn your innovation into something visible.",
     images: [
       {
-        url: "https://bu-launchpad.vercel.app/og/image.png",
+        url: "https://bu-launchpad.vercel.app/open-graph/image.png",
         width: 1639,
-        height: 858
-      }
-    ]
+        height: 858,
+      },
+    ],
   },
+  icons: {
+    icon: [
+      { url: "/metadata/favicon.ico" },
+      { url: "/metadata/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/metadata/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: "/metadata/apple-touch-icon.png",
+  },
+  manifest: "/metadata/site.webmanifest",
 };
 
 export default function RootLayout({
