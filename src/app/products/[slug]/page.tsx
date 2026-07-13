@@ -48,14 +48,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /* -------------------------------------------------------------------------- */
-/*                        STATIC METADATA FOR STREAMING                       */
-/* -------------------------------------------------------------------------- */
-export const metadata: Metadata = {
-  title: "BU Launchpad",
-  description: "Discover student-built startups on BU Launchpad.",
-};
-
-/* -------------------------------------------------------------------------- */
 /*                           GENERATE STATIC PARAMS                           */
 /* -------------------------------------------------------------------------- */
 export async function generateStaticParams() {
