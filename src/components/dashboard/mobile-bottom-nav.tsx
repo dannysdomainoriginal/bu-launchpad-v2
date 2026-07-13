@@ -24,7 +24,7 @@ interface MobileBottomNavProps {
 const navItems = [
   {
     key: "overview" as const,
-    label: "Home",
+    label: "Overview",
     icon: Home,
   },
   {

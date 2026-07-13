@@ -35,11 +35,11 @@ export default function Header() {
       Icon: CompassIcon,
       link: "/explore",
     },
-    // {
-    //   label: "Your Profile",
-    //   Icon: UserIcon,
-    //   link: "/profile",
-    // },
+    {
+      label: "Dashboard",
+      Icon: UserIcon,
+      link: "/dashboard",
+    },
   ];
 
   return (
@@ -50,7 +50,7 @@ export default function Header() {
           <Logo />
 
           {/* Menu */}
-          <nav className={cn("items-center gap-1", "hidden sm:flex")}>
+          <nav className={cn("items-center gap-1", "hidden md:flex")}>
             {navLinks.map(({ label, link, Icon }) => (
               <Link
                 key={label}
@@ -64,7 +64,7 @@ export default function Header() {
           </nav>
 
           {/* Menu Buttons */}
-          <div className="hidden sm:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-3">
             <Suspense fallback={<div>Loading Auth...</div>}>
               <Show when="signed-out">
                 <SignInButton>
@@ -95,7 +95,7 @@ export default function Header() {
           </div>
 
           {/* Mobile Nav */}
-          <div className="sm:hidden flex items-center gap-2">
+          <div className="md:hidden flex items-center gap-2">
             <Suspense fallback={null}>
               <Show when="signed-in">
                 <UserButton />
@@ -117,7 +117,7 @@ export default function Header() {
         {/* Full width dropdown */}
         <div
           className={cn(
-            "sm:hidden overflow-hidden transition-all duration-300",
+            "md:hidden overflow-hidden transition-all duration-300",
             "absolute left-0 right-0",
             isOpen
               ? "max-h-128 opacity-100"
