@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight, Users } from "lucide-react";
 
@@ -113,18 +114,24 @@ export default function ProductDetails({ product, tags }: Props) {
         <div className="space-y-6">
           <Card className="h-fit p-6">
             <div className="space-y-4">
-              <Image
-                alt={product.authorName}
-                src={product.authorAvatar}
-                width={80}
-                height={80}
-                className="rounded-full"
-              />
+              <div className="flex items-center gap-4">
+                <Image
+                  alt={product.authorName}
+                  src={product.authorAvatar}
+                  width={64}
+                  height={64}
+                  className="size-16 rounded-full object-cover"
+                />
 
-              <div>
-                <p className="font-medium">{product.authorName}</p>
-                <p className="text-sm text-muted-foreground">Builder</p>
+                <div>
+                  <p className="font-semibold">{product.authorName}</p>
+                  <p className="text-sm text-muted-foreground">Builder</p>
+                </div>
               </div>
+
+              <Button variant="outline" className="w-full py-5" asChild>
+                <Link href={`/builder/${product.authorId}`}>View Profile</Link>
+              </Button>
             </div>
           </Card>
 

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { SectionHeader } from "../ui/SectionHeader";
 import { ArrowUpRightIcon } from "lucide-react";
 import { CalendarIcon, RocketIcon } from "lucide-react";
-import { ProductCard } from "@/modules/products/products.component";
+import { ProductCard } from "@/modules/products/components";
 import { EmptySlate } from "../ui/EmptySlate";
 import { getRecentlyUploaded } from "@/modules/products/products.service";
 import { Button } from "../ui/button";

@@ -16,6 +16,7 @@ export const saveProfileAction = async (
   data: BuilderProfileFormSchemaType,
 ): Promise<FormState> => {
   const { userId } = await auth();
+  console.log(userId);
 
   if (!userId) {
     return {

@@ -3,7 +3,7 @@ import { ArrowRight, XCircle } from "lucide-react";
 
 export default function SuccessNotFound() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-6 py-20 text-center">
+    <main className="flex flex-1 flex-col items-center justify-center px-6 text-center">
       <div className="inline-flex h-24 w-24 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary shadow-lg shadow-primary/10">
         <XCircle className="h-12 w-12" />
       </div>
@@ -12,7 +12,7 @@ export default function SuccessNotFound() {
         Submission not found
       </h1>
       <p className="mt-4 max-w-xl text-sm text-muted-foreground md:text-base">
-        We couldn’t find the requested submission. It may have been removed or
+        We couldn’t find the requested submission. It may have been disapproved, deleted by owner or
         the link is invalid.
       </p>
 

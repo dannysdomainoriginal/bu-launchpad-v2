@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowUpRightIcon, StarIcon } from "lucide-react";
 import { SectionHeader } from "../ui/SectionHeader";
 import { Button } from "../ui/button";
-import { ProductCard } from "@/modules/products/products.component";
+import { ProductCard } from "@/modules/products/components";
 import { getFeaturedProducts } from "@/modules/products/products.service";
 import { EmptySlate } from "../ui/EmptySlate";
 
@@ -21,7 +21,7 @@ export default async function FeaturedProducts() {
             Icon={StarIcon}
             description="Top picks from our community this week"
           />
-          
+
           <Button
             asChild
             variant="outline"

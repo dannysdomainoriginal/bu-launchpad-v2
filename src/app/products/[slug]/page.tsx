@@ -7,7 +7,7 @@ import { getProductMetadata } from "@/modules/products/products.service";
 import {
   ProductDetailsWrapper,
   ProductDetailsSkeleton,
-} from "@/modules/products/products.component";
+} from "@/modules/products/components";
 
 /* -------------------------------------------------------------------------- */
 /*                              GENERATE METADATA                             */

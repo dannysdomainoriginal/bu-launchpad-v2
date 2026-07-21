@@ -10,7 +10,7 @@ export default function SuccessPage({ params }: Props) {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center">
+        <div className="flex-1 flex items-center justify-center">
           <div className="size-9 animate-spin rounded-full border-2 border-white/80 border-t-muted" />
         </div>
       }

@@ -45,13 +45,17 @@ export async function getCachedClerkUser(userId: string) {
 /* -------------------------------------------------------------------------- */
 /*                         GET BUILDER PROFILE PAGE                           */
 /* -------------------------------------------------------------------------- */
-export async function getBuilderProfilePage(userId: string) {
+export async function getBuilderPageData(userId: string) {
   // Composes smaller cached services
   const [builder, profile, products] = await Promise.all([
-    getCachedClerkUser(userId),
+    getCachedClerkUser(userId).catch(() => null),
     getBuilderProfile(userId),
     getProductsByUserId(userId, {}),
   ]);
+
+  if (!builder) {
+    return null
+  }
 
   const innovations = products.length;
   const totalVotes = products.reduce((sum, p) => sum + p.voteCount, 0);
