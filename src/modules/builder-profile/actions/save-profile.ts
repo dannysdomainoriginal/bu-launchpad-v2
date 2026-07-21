@@ -29,14 +29,15 @@ export const saveProfileAction = async (
   if (!parsed.success) {
     return {
       success: false,
-      message: parsed.error.issues[0]?.message || "Validation failed.",
+      message: parsed.error.issues[0]?.message || "Your input did not pass server-side validation.",
     };
   }
 
   try {
     await upsertBuilderProfile(userId, parsed.data);
-  } catch (err: any) {
-    console.error("Failed to save builder profile:", err);
+  } catch (error) {
+    console.error("Failed to save builder profile:", error);
+
     return {
       success: false,
       message: "There was an error saving your profile.",

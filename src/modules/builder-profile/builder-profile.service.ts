@@ -1,7 +1,6 @@
 import { db } from "@/lib/db";
-import { builderProfiles, BuilderProfile } from "@/lib/db/schemas/builderProfiles";
-import { eq } from "drizzle-orm";
-import { clerkClient } from "@clerk/nextjs/server";
+import { builderProfiles, BuilderProfile } from "@/lib/db/schema";
+import { staticClerkClient } from "@/lib/clerk-client";
 import { cacheTag, cacheLife, revalidateTag, refresh } from "next/cache";
 import { getProductsByUserId } from "@/modules/products/products.service";
 
@@ -25,10 +24,8 @@ export async function getBuilderProfile(userId: string): Promise<BuilderProfile 
 export async function getCachedClerkUser(userId: string) {
   "use cache";
   cacheLife("days");
-  cacheTag(`clerk-user:by-id:${userId}`);
-
-  const clerk = await clerkClient();
-  const user = await clerk.users.getUser(userId);
+  
+  const user = await staticClerkClient.users.getUser(userId);
 
   const name =
     user.fullName ||
@@ -117,7 +114,6 @@ export async function upsertBuilderProfile(
       twitterUrl: data.twitterUrl || null,
       websiteUrl: data.websiteUrl || null,
       clerkCreatedAt,
-      updatedAt: new Date(),
     })
     .onConflictDoUpdate({
       target: builderProfiles.userId,
@@ -129,7 +125,6 @@ export async function upsertBuilderProfile(
         linkedinUrl: data.linkedinUrl || null,
         twitterUrl: data.twitterUrl || null,
         websiteUrl: data.websiteUrl || null,
-        updatedAt: new Date(),
       },
     });
 
