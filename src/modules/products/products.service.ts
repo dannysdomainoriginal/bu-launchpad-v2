@@ -81,7 +81,7 @@ export async function getProductBySlug(slug: string) {
 /* -------------------------------------------------------------------------- */
 /*                        GET METADATA DETAILS BY SLUG                        */
 /* -------------------------------------------------------------------------- */
-export async function getMetadataProduct(slug: string) {
+export async function getProductMetadata(slug: string) {
   "use cache";
   cacheTag(`product:by-slug:${slug}`);
 

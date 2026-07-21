@@ -1,6 +1,6 @@
 import React from "react";
 
-import { ProductCard } from "@/modules/products/products.component";
+import { ProductCard } from "@/modules/products/components";
 import { ProductWithTags } from "@/lib/db/schema";
 
 type Props = {

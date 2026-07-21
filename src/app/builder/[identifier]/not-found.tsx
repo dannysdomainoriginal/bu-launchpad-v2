@@ -1,27 +1,30 @@
 import Link from "next/link";
 import { ArrowRight, SearchXIcon } from "lucide-react";
 
-export default function ProductDetailsNotFoundPage() {
+export default function BuilderNotFoundPage() {
   return (
-    <main className="flex flex-1 flex-col items-center justify-center px-6 text-center">
+    <main className="flex flex-1 flex-col items-center justify-center px-6 py-20 text-center">
+      {/* Icon Badge */}
       <div className="inline-flex h-24 w-24 items-center justify-center rounded-full border border-destructive/30 bg-destructive/10 text-destructive shadow-lg shadow-destructive/10">
         <SearchXIcon className="h-12 w-12" />
       </div>
 
+      {/* Title & Description */}
       <h1 className="mt-8 text-3xl font-bold tracking-tight">
-        Product not found
+        Builder not found
       </h1>
       <p className="mt-4 max-w-xl text-sm text-muted-foreground md:text-base">
-        We couldn’t locate that product. It may have been removed, not yet
-        approved, or the link is invalid.
+        We couldn't find the builder you're looking for. They may have deleted
+        their account, or the link may be incorrect.
       </p>
 
+      {/* Action Buttons */}
       <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
         <Link
           href="/explore"
-          className="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition hover:bg-primary-light"
+          className="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
         >
-          Explore products
+          Explore innovations
         </Link>
 
         <Link

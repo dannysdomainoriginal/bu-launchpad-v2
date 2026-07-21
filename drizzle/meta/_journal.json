@@ -22,6 +22,13 @@
       "when": 1783857308321,
       "tag": "0002_sticky_shadowcat",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1784578654106,
+      "tag": "0003_daffy_black_tarantula",
+      "breakpoints": true
     }
   ]
 }

@@ -2,7 +2,7 @@ import { SparklesIcon } from "lucide-react";
 import { Suspense } from "react";
 
 import { SectionHeader } from "@/components/ui/SectionHeader";
-import { ProductSubmitFormWrapper } from "@/modules/products/products.component";
+import { ProductSubmitFormWrapper } from "@/modules/products/components";
 
 export default function SubmitPage() {
   return (

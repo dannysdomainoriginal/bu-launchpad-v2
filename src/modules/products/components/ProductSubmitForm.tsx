@@ -7,10 +7,10 @@ import { SparklesIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import ProductFormField from "./ProductFormField";
 import ProductImageUpload from "./ProductImageUploader";
 import TagInput from "./TagInput";
 
+import { FormField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/button";
 import { addProductAction } from "../actions";
 
@@ -57,7 +57,7 @@ export default function ProductSubmitForm() {
   const nameValue = watch("name");
   const slugValue = slugify(nameValue);
 
-  const router = useRouter()
+  const router = useRouter();
 
   const onSubmit: SubmitHandler<CreateProductFormSchemaType> = async (data) => {
     try {
@@ -115,7 +115,7 @@ export default function ProductSubmitForm() {
         name="name"
         control={control}
         render={({ field, fieldState }) => (
-          <ProductFormField
+          <FormField
             label="Product Name"
             name={field.name}
             id="name"
@@ -132,7 +132,7 @@ export default function ProductSubmitForm() {
         name="tagline"
         control={control}
         render={({ field, fieldState }) => (
-          <ProductFormField
+          <FormField
             label="Tagline"
             name={field.name}
             id="tagline"
@@ -145,7 +145,7 @@ export default function ProductSubmitForm() {
         )}
       />
 
-      <ProductFormField
+      <FormField
         label="Slug"
         name="slug"
         id="slug"
@@ -160,7 +160,7 @@ export default function ProductSubmitForm() {
         name="description"
         control={control}
         render={({ field, fieldState }) => (
-          <ProductFormField
+          <FormField
             label="Description"
             name={field.name}
             id="description"
@@ -178,7 +178,7 @@ export default function ProductSubmitForm() {
         name="liveUrl"
         control={control}
         render={({ field, fieldState }) => (
-          <ProductFormField
+          <FormField
             label="Live URL"
             name={field.name}
             id="liveUrl"

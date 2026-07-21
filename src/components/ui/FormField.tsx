@@ -13,14 +13,14 @@ type Props = {
   placeholder: string;
   required: boolean;
   error?: string;
-  value?: string; // specifically for liveUrl, which is optional
+  value?: string;
   onChange?: InputChangeEvent | TextAreaChangeEvent;
   helperText?: string;
   textarea?: boolean;
   readOnly?: boolean;
 };
 
-export default function ProductFormField({
+export function FormField({
   label,
   name,
   id,

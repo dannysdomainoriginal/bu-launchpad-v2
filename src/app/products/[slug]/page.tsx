@@ -1,21 +1,20 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 
+import { db } from "@/lib/db";
+import { products } from "@/lib/db/schema";
+import { getProductMetadata } from "@/modules/products/products.service";
 import {
   ProductDetailsWrapper,
   ProductDetailsSkeleton,
-} from "@/modules/products/products.component";
-import { db } from "@/lib/db";
-import { products } from "@/lib/db/schema";
-import type { Metadata } from "next";
-import { eq } from "drizzle-orm";
-import { getMetadataProduct } from "@/modules/products/products.service";
+} from "@/modules/products/components";
 
 /* -------------------------------------------------------------------------- */
 /*                              GENERATE METADATA                             */
 /* -------------------------------------------------------------------------- */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const product = await getMetadataProduct(slug);
+  const product = await getProductMetadata(slug);
 
   if (!product) {
     return {
