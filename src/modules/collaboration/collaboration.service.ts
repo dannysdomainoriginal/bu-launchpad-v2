@@ -19,9 +19,7 @@ export async function insertCollaborationRequest(data: {
   message: string;
 }) {
   const [existing] = await db
-    .select({
-      id: productCollaboration.id,
-    })
+    .select({ id: productCollaboration.id })
     .from(productCollaboration)
     .where(
       and(
@@ -77,9 +75,9 @@ export async function rejectCollaborationRequest(
 }
 
 /* -------------------------------------------------------------------------- */
-/*                      GET REQUEST STATUS FOR PRODUCT                        */
+/*                      CHECK REQUEST STATUS FOR PRODUCT                        */
 /* -------------------------------------------------------------------------- */
-export async function getCollaborationRequestStatus(
+export async function checkCollaborationRequestStatus(
   productId: string,
   requesterId: string,
 ) {
@@ -103,10 +101,8 @@ export async function getCollaborationRequestStatus(
 /*                     GET SINGLE COLLAB REQUEST BY ID                        */
 /* -------------------------------------------------------------------------- */
 export async function getCollaborationRequestById(requestId: string) {
-  "use cache";
-
-  cacheTag(`collaboration:${requestId}`);
-
+  // don't cache it
+  
   const [request] = await db
     .select()
     .from(productCollaboration)

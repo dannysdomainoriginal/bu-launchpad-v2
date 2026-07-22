@@ -3,12 +3,19 @@
 import { revalidateTag } from "next/cache";
 import { auth, currentUser } from "@clerk/nextjs/server";
 
-import { handleCollaborationEmail } from "@/modules/mail";
-
 import { createCollaborationRequestSchema } from "./collaboration.schema";
+
 import {
-  getCollaborationRequestStatus as getCollaborationRequestStatusService,
+  handleCollaborationRequestEmail,
+  handleCollaborationAcceptedEmail,
+  handleCollaborationRejectedEmail,
+} from "@/modules/mail";
+
+import {
+  checkCollaborationRequestStatus,
   insertCollaborationRequest,
+  acceptCollaborationRequest,
+  rejectCollaborationRequest,
 } from "./collaboration.service";
 
 type FormState = {
@@ -22,6 +29,9 @@ type Props = {
   message?: string;
 };
 
+/* -------------------------------------------------------------------------- */
+/*                          ADD COLLABORATION REQUEST                         */
+/* -------------------------------------------------------------------------- */
 export async function addCollaborationRequestAction(
   data: Props,
 ): Promise<FormState> {
@@ -83,16 +93,15 @@ export async function addCollaborationRequestAction(
       };
     }
 
-    const success = await handleCollaborationEmail(requestId);
-
-    if (!success) {
-      return {
-        success: false,
-        message: "Failed to send collaboration request email.",
-      };
+    const emailSent = await handleCollaborationRequestEmail(requestId);
+    if (!emailSent) {
+      console.warn(
+        `Failed to send collaboration request email for request ${requestId}`,
+      );
     }
 
-    revalidateTag(`product:${parsed.data.productId}:collaboration`, "max");
+    revalidateTag(`collaborations:requester:${userId}`, "max");
+    revalidateTag(`collaborations:owner:${data.ownerId}`, "max");
 
     return {
       success: true,
@@ -113,13 +122,100 @@ export async function addCollaborationRequestAction(
 /* -------------------------------------------------------------------------- */
 /*                          GET COLLAB REQUEST STATUS                         */
 /* -------------------------------------------------------------------------- */
-
-export async function getCollaborationRequestStatusAction(productId: string) {
+export async function getCollaborationRequestStatus(productId: string) {
   const { userId } = await auth();
 
   if (!userId) {
     return null;
   }
 
-  return getCollaborationRequestStatusService(productId, userId);
+  return checkCollaborationRequestStatus(productId, userId);
+}
+
+/* -------------------------------------------------------------------------- */
+/*                        ACCEPT COLLAB REQUEST ACTION                         */
+/* -------------------------------------------------------------------------- */
+export async function acceptCollaborationRequestAction(
+  requestId: string,
+): Promise<FormState> {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return {
+      success: false,
+      message: "You must be signed in to manage requests.",
+    };
+  }
+
+  try {
+    // 1. Update DB status
+    await acceptCollaborationRequest(requestId, userId);
+
+    // 2. Send email notification to requester
+    const emailSent = await handleCollaborationAcceptedEmail(requestId);
+    if (!emailSent) {
+      console.warn(`Failed to send acceptance email for request ${requestId}`);
+    }
+
+    // 3. Revalidate cache tags if needed
+    revalidateTag(`collaborations:owner:${userId}`, "max");
+
+    return {
+      success: true,
+      message: "Collaboration request accepted successfully.",
+    };
+  } catch (err) {
+    if (process.env.NODE_ENV === "development") {
+      console.error(err);
+    }
+
+    return {
+      success: false,
+      message: "Failed to accept collaboration request.",
+    };
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/*                        REJECT COLLAB REQUEST ACTION                         */
+/* -------------------------------------------------------------------------- */
+export async function rejectCollaborationRequestAction(
+  requestId: string,
+): Promise<FormState> {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return {
+      success: false,
+      message: "You must be signed in to manage requests.",
+    };
+  }
+
+  try {
+    // 1. Update DB status
+    await rejectCollaborationRequest(requestId, userId);
+
+    // 2. Send email notification to requester
+    const emailSent = await handleCollaborationRejectedEmail(requestId);
+    if (!emailSent) {
+      console.warn(`Failed to send rejection email for request ${requestId}`);
+    }
+
+    // 3. Revalidate cache tags if needed
+    revalidateTag(`collaborations:owner:${userId}`, "max");
+
+    return {
+      success: true,
+      message: "Collaboration request updated.",
+    };
+  } catch (err) {
+    if (process.env.NODE_ENV === "development") {
+      console.error(err);
+    }
+
+    return {
+      success: false,
+      message: "Failed to update collaboration request.",
+    };
+  }
 }
