@@ -7,8 +7,8 @@ import { handleCollaborationEmail } from "@/modules/mail";
 
 import { createCollaborationRequestSchema } from "./collaboration.schema";
 import {
+  getCollaborationRequestStatus as getCollaborationRequestStatusService,
   insertCollaborationRequest,
-  checkCollaborationRequestStatus,
 } from "./collaboration.service";
 
 type FormState = {
@@ -18,6 +18,7 @@ type FormState = {
 
 type Props = {
   productId: string;
+  ownerId: string;
   message?: string;
 };
 
@@ -55,7 +56,8 @@ export async function addCollaborationRequestAction(
   }
 
   const requestId = crypto.randomUUID();
-  const senderName =
+
+  const requesterName =
     user.fullName ||
     `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() ||
     user.username ||
@@ -65,20 +67,24 @@ export async function addCollaborationRequestAction(
     const inserted = await insertCollaborationRequest({
       id: requestId,
       productId: parsed.data.productId,
+      ownerId: data.ownerId,
+
+      requesterId: userId,
+      requesterName,
+      requesterAvatar: user.imageUrl ?? null,
+
       message: parsed.data.message,
-      userId,
-      userName: senderName,
-      userAvatar: user.imageUrl ?? null,
     });
 
     if (!inserted) {
       return {
         success: true,
-        message: "Sent request straight to owner's mail",
+        message: "You've already sent a collaboration request.",
       };
     }
 
     const success = await handleCollaborationEmail(requestId);
+
     if (!success) {
       return {
         success: false,
@@ -90,7 +96,7 @@ export async function addCollaborationRequestAction(
 
     return {
       success: true,
-      message: "Sent request straight to owner's mail",
+      message: "Sent request straight to owner's mail.",
     };
   } catch (err) {
     if (process.env.NODE_ENV === "development") {
@@ -107,12 +113,13 @@ export async function addCollaborationRequestAction(
 /* -------------------------------------------------------------------------- */
 /*                          GET COLLAB REQUEST STATUS                         */
 /* -------------------------------------------------------------------------- */
-export async function getCollaborationRequestStatus(productId: string) {
+
+export async function getCollaborationRequestStatusAction(productId: string) {
   const { userId } = await auth();
 
   if (!userId) {
-    return false;
+    return null;
   }
 
-  return checkCollaborationRequestStatus(productId, userId);
+  return getCollaborationRequestStatusService(productId, userId);
 }
