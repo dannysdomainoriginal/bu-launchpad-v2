@@ -29,6 +29,20 @@
       "when": 1784578654106,
       "tag": "0003_daffy_black_tarantula",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1784733870638,
+      "tag": "0004_absurd_nextwave",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1784734118945,
+      "tag": "0005_lovely_the_executioner",
+      "breakpoints": true
     }
   ]
 }
