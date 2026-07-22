@@ -1,22 +1,25 @@
-import { clerkClient } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 
 import { db } from "@/lib/db";
+import { staticClerkClient } from "@/lib/clerk-client";
 import { productCollaboration, products } from "@/lib/db/schema";
+
 import { sendMail } from "../mail.service";
 import { collaborationEmailTemplate } from "../templates";
-import { deleteCollaborationRequestById } from "@/modules/collaboration/collaboration.service";
 
 export async function handleCollaborationEmail(requestId: string) {
   try {
     const [result] = await db
       .select({
         collaborationMessage: productCollaboration.message,
-        senderName: productCollaboration.userName,
-        senderAvatar: productCollaboration.userAvatar,
+        requesterName: productCollaboration.requesterName,
+        requesterAvatar: productCollaboration.requesterAvatar,
+        requesterId: productCollaboration.requesterId, // 👈 Added: needed for builder profile link
+
         productName: products.name,
         productTagline: products.tagline,
-        authorId: products.authorId,
+
+        ownerId: productCollaboration.ownerId,
       })
       .from(productCollaboration)
       .innerJoin(products, eq(productCollaboration.productId, products.id))
@@ -27,23 +30,32 @@ export async function handleCollaborationEmail(requestId: string) {
       throw new Error(`Collaboration request ${requestId} not found.`);
     }
 
-    const clerk = await clerkClient();
-    const owner = await clerk.users.getUser(result.authorId);
+    const owner = await staticClerkClient.users.getUser(result.ownerId);
 
     const recipientEmail =
       owner.primaryEmailAddress?.emailAddress ??
       owner.emailAddresses[0]?.emailAddress;
 
     if (!recipientEmail) {
-      throw new Error(`Owner ${result.authorId} has no email address.`);
+      throw new Error(`Owner ${result.ownerId} has no email address.`);
     }
+
+    // Fallback URL if env variable isn't loaded in runtime
+    const baseUrl = process.env.BASE_URL || "https://bu-launchpad.vercel.app";
 
     const { subject, html } = collaborationEmailTemplate({
       productName: result.productName,
-      senderName: result.senderName,
-      collaborationMessage: result.collaborationMessage,
-      senderAvatar: result.senderAvatar,
       productTagline: result.productTagline,
+
+      // Fixed property names matching the template props:
+      requesterName: result.requesterName,
+      requesterAvatar: result.requesterAvatar,
+
+      collaborationMessage: result.collaborationMessage,
+
+      // Generated dynamic URLs based on your BASE_URL:
+      reviewRequestUrl: `${baseUrl}/dashboard?tab=collabs`,
+      builderProfileUrl: `${baseUrl}/builders/${result.requesterId}`,
     });
 
     await sendMail({
@@ -59,8 +71,6 @@ export async function handleCollaborationEmail(requestId: string) {
       error,
     );
 
-    // clean up
-    await deleteCollaborationRequestById(requestId);
     return false;
   }
 }

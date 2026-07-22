@@ -1,8 +1,9 @@
-import { clerkClient } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 
 import { db } from "@/lib/db";
+import { staticClerkClient } from "@/lib/clerk-client";
 import { productFeedback, products } from "@/lib/db/schema";
+
 import { sendMail } from "../mail.service";
 import { feedbackEmailTemplate } from "../templates";
 
@@ -24,9 +25,7 @@ export async function handleFeedbackEmail(feedbackId: string) {
     throw new Error(`Feedback ${feedbackId} not found.`);
   }
 
-  // 2. Fetch the latest owner email from Clerk
-  const clerk = await clerkClient();
-  const owner = await clerk.users.getUser(result.authorId);
+  const owner = await staticClerkClient.users.getUser(result.authorId);
 
   const recipientEmail =
     owner.primaryEmailAddress?.emailAddress ??

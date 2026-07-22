@@ -1,12 +1,17 @@
 type CollaborationEmailTemplateProps = {
   productName: string;
-  senderName: string;
-  collaborationMessage: string;
-  senderAvatar?: string | null;
   productTagline?: string | null;
+  requesterName: string;
+  requesterAvatar?: string | null;
+  collaborationMessage: string;
+  reviewRequestUrl: string;
+  builderProfileUrl: string;
 };
 
-function escapeHtml(value: string) {
+/**
+ * Escapes special characters to prevent HTML injection.
+ */
+function escapeHtml(value: string): string {
   return value
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -17,202 +22,130 @@ function escapeHtml(value: string) {
 
 export default function collaborationEmailTemplate({
   productName,
-  senderName,
-  collaborationMessage,
-  senderAvatar,
   productTagline,
+  requesterName,
+  requesterAvatar,
+  collaborationMessage,
+  reviewRequestUrl,
+  builderProfileUrl,
 }: CollaborationEmailTemplateProps) {
-  const subject = `🤝 ${senderName} wants to team up with you on ${productName}`;
+  const subject = `${requesterName} wants to collaborate on ${productName}`;
 
-  const safeProductName = escapeHtml(productName);
-  const safeSenderName = escapeHtml(senderName);
-  const safeCollaborationMessage = escapeHtml(collaborationMessage).replace(
-    /\n/g,
-    "<br>",
-  );
-  const safeProductTagline = productTagline ? escapeHtml(productTagline) : null;
-  const safeSenderAvatar = senderAvatar ? escapeHtml(senderAvatar) : null;
+  const safeProduct = escapeHtml(productName);
+  const safeTagline = productTagline ? escapeHtml(productTagline) : "";
+  const safeName = escapeHtml(requesterName);
+  const safeMessage = escapeHtml(collaborationMessage).replace(/\n/g, "<br />");
+  const safeAvatar = requesterAvatar ? escapeHtml(requesterAvatar) : "";
 
-  const html = `
-<!DOCTYPE html>
+  // Keep URLs clean for href attributes
+  const reviewUrl = encodeURI(reviewRequestUrl);
+  const profileUrl = encodeURI(builderProfileUrl);
+
+  const avatarHtml = safeAvatar
+    ? `<img src="${safeAvatar}" width="56" height="56" alt="${safeName}" style="border-radius:9999px; border:3px solid #9032F2; display:block; object-fit:cover;" />`
+    : `<div style="width:56px; height:56px; border-radius:9999px; background:#9032F2; color:#ffffff; font-family:Arial, sans-serif; font-weight:700; font-size:22px; line-height:56px; text-align:center;">${safeName.charAt(0).toUpperCase()}</div>`;
+
+  const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<style>
-body {
-  margin: 0;
-  padding: 0;
-  background: #f5f7fb;
-  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-  color: #1f2937;
-}
-.wrapper {
-  width: 100%;
-  padding: 32px 16px;
-  box-sizing: border-box;
-}
-.container {
-  max-width: 640px;
-  margin: 0 auto;
-  background: white;
-  border-radius: 18px;
-  overflow: hidden;
-  border: 1px solid #e5e7eb;
-}
-.hero {
-  background: linear-gradient(135deg, #111827, #2563eb);
-  padding: 40px 32px;
-  color: white;
-}
-.logo {
-  font-size: 24px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  margin-bottom: 12px;
-}
-.hero h1 {
-  margin: 0;
-  font-size: 26px;
-  line-height: 1.3;
-}
-.hero p {
-  margin: 12px 0 0;
-  opacity: 0.9;
-  font-size: 15px;
-  line-height: 1.6;
-}
-.content {
-  padding: 32px;
-}
-.label {
-  color: #6b7280;
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 6px;
-}
-.value {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 24px;
-}
-.sender-card {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  padding: 16px;
-  margin-bottom: 24px;
-}
-.avatar {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #dbeafe;
-}
-.avatar-fallback {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #2563eb, #60a5fa);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  font-weight: 700;
-}
-.sender-meta strong {
-  display: block;
-  font-size: 16px;
-  margin-bottom: 4px;
-}
-.sender-meta span {
-  color: #6b7280;
-  font-size: 14px;
-  line-height: 1.5;
-}
-.message-box {
-  background: #f9fafb;
-  border-left: 4px solid #2563eb;
-  padding: 20px;
-  border-radius: 10px;
-  line-height: 1.75;
-  font-size: 15px;
-  white-space: pre-wrap;
-  margin-bottom: 24px;
-}
-.cta {
-  background: #eff6ff;
-  color: #1e3a8a;
-  border-radius: 10px;
-  padding: 16px 18px;
-  font-size: 14px;
-  line-height: 1.7;
-}
-.footer {
-  text-align: center;
-  padding: 28px;
-  font-size: 13px;
-  color: #6b7280;
-  border-top: 1px solid #e5e7eb;
-}
-.footer strong {
-  color: #111827;
-}
-@media only screen and (max-width: 600px) {
-  .hero { padding: 32px 24px; }
-  .content { padding: 24px; }
-  .hero h1 { font-size: 22px; }
-  .value { font-size: 16px; }
-  .message-box { font-size: 14px; }
-}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${escapeHtml(subject)}</title>
 </head>
-<body>
-<div class="wrapper">
-  <div class="container">
-    <div class="hero">
-      <div class="logo">🚀 BU Launchpad</div>
-      <h1>${safeSenderName} wants to build with you</h1>
-      <p>Someone is excited about your idea and wants to jump in on ${safeProductName}.</p>
-    </div>
+<body style="margin:0; padding:32px 16px; background-color:#f6f7fb; font-family:Inter, Helvetica, Arial, sans-serif; color:#1f2937;">
+  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width:640px; background-color:#ffffff; border:1px solid #e5e7eb; border-radius:18px; overflow:hidden;">
+          
+          <!-- Header Header -->
+          <tr>
+            <td style="background-color:#9032F2; padding:40px; color:#ffffff;">
+              <div style="font-size:24px; font-weight:800;">🚀 BU Launchpad</div>
+              <div style="margin-top:18px; font-size:26px; font-weight:700; line-height:1.3;">
+                Someone believes they can help move your project forward.
+              </div>
+              <div style="margin-top:12px; font-size:16px; opacity:0.95;">
+                <strong>${safeName}</strong> wants to collaborate on <strong>${safeProduct}</strong>.
+              </div>
+            </td>
+          </tr>
 
-    <div class="content">
-      <div class="label">Project</div>
-      <div class="value">${safeProductName}</div>
+          <!-- Main Content Body -->
+          <tr>
+            <td style="padding:32px;">
+              <div style="font-size:12px; text-transform:uppercase; color:#6b7280; letter-spacing:0.08em; font-weight:600;">
+                Project
+              </div>
+              <div style="font-size:22px; font-weight:700; margin-top:6px; color:#111827;">
+                ${safeProduct}
+              </div>
+              ${
+                safeTagline
+                  ? `<div style="margin-top:8px; color:#64748b; font-size:15px; line-height:1.4;">${safeTagline}</div>`
+                  : ""
+              }
 
-      ${safeProductTagline ? `<div class="label">What it’s about</div><div class="value">${safeProductTagline}</div>` : ""}
+              <!-- Requester Card (Email-safe table layout instead of flexbox) -->
+              <div style="margin-top:28px; border:1px solid #e5e7eb; border-radius:14px; padding:18px; background-color:#ffffff;">
+                <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td width="56" valign="middle">
+                      ${avatarHtml}
+                    </td>
+                    <td style="padding-left:16px;" valign="middle">
+                      <div style="font-size:17px; font-weight:700; color:#111827;">${safeName}</div>
+                      <div style="color:#64748b; font-size:14px; margin-top:4px;">
+                        Interested in helping build this project.
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </div>
 
-      <div class="sender-card">
-        ${safeSenderAvatar ? `<img src="${safeSenderAvatar}" alt="${safeSenderName}" class="avatar" />` : `<div class="avatar-fallback">${safeSenderName.charAt(0).toUpperCase()}</div>`}
-        <div class="sender-meta">
-          <strong>${safeSenderName}</strong>
-          <span>Would love to explore this project with you and see what you could build together.</span>
-        </div>
-      </div>
+              <!-- Reach Out Section -->
+              <div style="margin-top:28px; font-size:12px; text-transform:uppercase; color:#6b7280; letter-spacing:0.08em; font-weight:600;">
+                Why they're reaching out
+              </div>
 
-      <div class="label">Their note</div>
-      <div class="message-box">${safeCollaborationMessage}</div>
+              <div style="margin-top:10px; background-color:#fafafa; border-left:4px solid #9032F2; padding:20px; border-radius:10px; line-height:1.7; color:#374151; font-size:15px;">
+                ${safeMessage}
+              </div>
 
-      <div class="cta">
-        💬 Reply to this email to continue the conversation and turn this spark into a real collaboration.
-      </div>
-    </div>
+              <!-- Action CTAs -->
+              <div style="text-align:center; margin-top:34px;">
+                <a href="${reviewUrl}" target="_blank" style="display:inline-block; background-color:#9032F2; color:#ffffff; text-decoration:none; padding:15px 34px; border-radius:10px; font-weight:700; font-size:16px;">
+                  Review Request
+                </a>
+              </div>
 
-    <div class="footer">
-      <strong>BU Launchpad</strong><br />
-      Helping student founders validate ideas, gather feedback, find collaborators, and build products people actually want.
-    </div>
-  </div>
-</div>
+              <div style="text-align:center; margin-top:16px;">
+                <a href="${profileUrl}" target="_blank" style="color:#9032F2; text-decoration:none; font-weight:600; font-size:14px;">
+                  View Builder Profile &rarr;
+                </a>
+              </div>
+
+              <!-- Disclaimer Callout -->
+              <div style="margin-top:30px; padding:18px; background-color:#f8f5ff; border-radius:12px; color:#4b5563; font-size:14px; line-height:1.6;">
+                Accepting a collaboration request doesn't lock you into anything. It simply lets the builder know you're interested in continuing the conversation.
+              </div>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:26px; border-top:1px solid #e5e7eb; text-align:center; color:#6b7280; font-size:13px; line-height:1.5;">
+              <strong style="color:#111827;">BU Launchpad</strong><br />
+              Copyright &copy; 2026 - Dannys Domain. All Rights Reserved
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
-</html>
-`;
+</html>`;
 
   return { subject, html };
 }
