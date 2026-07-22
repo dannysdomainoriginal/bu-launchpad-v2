@@ -5,9 +5,9 @@ import { staticClerkClient } from "@/lib/clerk-client";
 import { productCollaboration, products } from "@/lib/db/schema";
 
 import { sendMail } from "../mail.service";
-import { collaborationEmailTemplate } from "../templates";
+import { collaborationRequestEmailTemplate } from "../templates";
 
-export async function handleCollaborationEmail(requestId: string) {
+export async function handleCollaborationRequestEmail(requestId: string) {
   try {
     const [result] = await db
       .select({
@@ -43,7 +43,7 @@ export async function handleCollaborationEmail(requestId: string) {
     // Fallback URL if env variable isn't loaded in runtime
     const baseUrl = process.env.BASE_URL || "https://bu-launchpad.vercel.app";
 
-    const { subject, html } = collaborationEmailTemplate({
+    const { subject, html } = collaborationRequestEmailTemplate({
       productName: result.productName,
       productTagline: result.productTagline,
 

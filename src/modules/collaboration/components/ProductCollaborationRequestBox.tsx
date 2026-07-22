@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 
 import CollaborationRequestCard from "./ProductCollaborationRequestCard";
-import { getCollaborationRequestStatusAction } from "@/modules/collaboration/collaboration.action";
+import { getCollaborationRequestStatus } from "@/modules/collaboration/collaboration.action";
 
 type CollaborationStatus = "pending" | "accepted" | "rejected" | null;
 
@@ -41,7 +41,7 @@ export default function ProductCollaborationRequestBox({
       setErrorVerifying(false);
 
       try {
-        const status = await getCollaborationRequestStatusAction(productId);
+        const status = await getCollaborationRequestStatus(productId);
 
         if (isMounted) {
           setRequestStatus(status);
