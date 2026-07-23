@@ -45,7 +45,7 @@ export async function handleCollaborationAcceptedEmail(requestId: string) {
       productTagline: result.productTagline,
       ownerName: result.ownerName,
       ownerAvatar: result.ownerAvatar,
-      builderProfileUrl: `${baseUrl}/builders/${result.ownerId}`,
+      builderProfileUrl: `${baseUrl}/builder/${result.ownerId}`,
     });
 
     await sendMail({

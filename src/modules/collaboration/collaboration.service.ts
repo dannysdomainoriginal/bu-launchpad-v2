@@ -2,7 +2,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { cacheTag } from "next/cache";
 
 import { db } from "@/lib/db";
-import { productCollaboration } from "@/lib/db/schema";
+import { productCollaboration, products } from "@/lib/db/schema";
 
 /* -------------------------------------------------------------------------- */
 /*                            INSERT COLLAB REQUEST                           */
@@ -122,8 +122,25 @@ export async function getIncomingCollaborationRequests(ownerId: string) {
   cacheTag(`collaborations:owner:${ownerId}`);
 
   return db
-    .select()
+    .select({
+      id: productCollaboration.id,
+
+      requesterId: productCollaboration.requesterId,
+      requesterName: productCollaboration.requesterName,
+      requesterAvatar: productCollaboration.requesterAvatar,
+
+      productId: productCollaboration.productId,
+      productName: products.name,
+
+      message: productCollaboration.message,
+
+      status: productCollaboration.status,
+
+      createdAt: productCollaboration.createdAt,
+      reviewedAt: productCollaboration.reviewedAt,
+    })
     .from(productCollaboration)
+    .innerJoin(products, eq(products.id, productCollaboration.productId))
     .where(eq(productCollaboration.ownerId, ownerId))
     .orderBy(desc(productCollaboration.createdAt));
 }
@@ -138,8 +155,22 @@ export async function getOutgoingCollaborationRequests(requesterId: string) {
   cacheTag(`collaborations:requester:${requesterId}`);
 
   return db
-    .select()
+    .select({
+      id: productCollaboration.id,
+
+      ownerId: productCollaboration.ownerId,
+      ownerName: products.authorName,
+
+      productId: productCollaboration.productId,
+      productName: products.name,
+
+      status: productCollaboration.status,
+
+      createdAt: productCollaboration.createdAt,
+      reviewedAt: productCollaboration.reviewedAt,
+    })
     .from(productCollaboration)
+    .innerJoin(products, eq(products.id, productCollaboration.productId))
     .where(eq(productCollaboration.requesterId, requesterId))
     .orderBy(desc(productCollaboration.createdAt));
 }

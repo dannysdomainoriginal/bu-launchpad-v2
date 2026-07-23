@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidateTag } from "next/cache";
+import { refresh, revalidateTag } from "next/cache";
 import { auth, currentUser } from "@clerk/nextjs/server";
 
 import { createCollaborationRequestSchema } from "./collaboration.schema";
@@ -159,6 +159,7 @@ export async function acceptCollaborationRequestAction(
 
     // 3. Revalidate cache tags if needed
     revalidateTag(`collaborations:owner:${userId}`, "max");
+    refresh()
 
     return {
       success: true,
@@ -203,6 +204,7 @@ export async function rejectCollaborationRequestAction(
 
     // 3. Revalidate cache tags if needed
     revalidateTag(`collaborations:owner:${userId}`, "max");
+    refresh()
 
     return {
       success: true,

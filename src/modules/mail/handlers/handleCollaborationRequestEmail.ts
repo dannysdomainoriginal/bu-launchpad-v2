@@ -55,7 +55,7 @@ export async function handleCollaborationRequestEmail(requestId: string) {
 
       // Generated dynamic URLs based on your BASE_URL:
       reviewRequestUrl: `${baseUrl}/dashboard?tab=collabs`,
-      builderProfileUrl: `${baseUrl}/builders/${result.requesterId}`,
+      builderProfileUrl: `${baseUrl}/builder/${result.requesterId}`,
     });
 
     await sendMail({
