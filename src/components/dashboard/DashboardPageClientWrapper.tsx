@@ -2,23 +2,27 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import CollabsTab from "./collabs-tab";
 import DashboardTabs from "./dashboard-tabs";
 import FeedbackTab from "./feedback-tab";
 import FloatingActionButton from "./floating-action-button";
 import InnovationsTab from "./innovations-tab";
 import MobileBottomNav from "./mobile-bottom-nav";
 import OverviewTab from "./overview-tab";
+
 import type {
-  Collaborator,
   DashboardEvent,
   DashboardStat,
   DashboardTab,
   FeedbackItem,
-  PendingRequest,
   ProductWithTags,
 } from "./types";
+
 import { DashboardTabSchemaType } from "@/modules/dashboard/dashboard.schema";
+import { DashboardCollaborationTab } from "@/modules/collaboration/components";
+import type {
+  IncomingCollaborationRequest,
+  OutgoingCollaborationRequest,
+} from "@/modules/collaboration/collaboration.types";
 
 type DashboardCounts = {
   feedbackCount: number;
@@ -27,19 +31,13 @@ type DashboardCounts = {
   pendingProductCount: number;
 };
 
-type DashboardCollaborationSummary = {
-  id: string;
-  userName?: string | null;
-  message?: string | null;
-  createdAt?: Date | string | null;
-};
-
 type Props = {
   initialTab: DashboardTabSchemaType;
   counts: DashboardCounts;
   products: ProductWithTags[];
   feedbacks: FeedbackItem[];
-  collaborations: DashboardCollaborationSummary[];
+  incomingRequests: IncomingCollaborationRequest[];
+  outgoingRequests: OutgoingCollaborationRequest[];
   events: DashboardEvent[];
 };
 
@@ -55,7 +53,8 @@ export default function DashboardPageClientWrapper({
   counts,
   products,
   feedbacks,
-  collaborations,
+  incomingRequests,
+  outgoingRequests,
   events,
 }: Props) {
   const [tab, setTab] = useState<DashboardTab>(initialTab);
@@ -111,22 +110,6 @@ export default function DashboardPageClientWrapper({
     ];
   }, [counts]);
 
-  const pendingRequests = useMemo<PendingRequest[]>(() => {
-    return collaborations.map((collaboration) => ({
-      id: collaboration.id,
-      name: collaboration.userName ?? "Collaboration request",
-      role: collaboration.message ?? "Would like to join your next launch",
-    }));
-  }, [collaborations]);
-
-  const collaborators = useMemo<Collaborator[]>(() => {
-    return collaborations.map((collaboration) => ({
-      id: collaboration.id,
-      name: collaboration.userName ?? "Collaborator",
-      role: collaboration.message ?? "Joined your launch journey",
-    }));
-  }, [collaborations]);
-
   const handleTabChange = (nextTab: DashboardTab) => {
     setTab(nextTab);
     setIsFabOpen(false);
@@ -145,9 +128,9 @@ export default function DashboardPageClientWrapper({
 
       case "collabs":
         return (
-          <CollabsTab
-            pendingRequests={pendingRequests}
-            collaborators={collaborators}
+          <DashboardCollaborationTab
+            incomingRequests={incomingRequests}
+            outgoingRequests={outgoingRequests}
           />
         );
 
