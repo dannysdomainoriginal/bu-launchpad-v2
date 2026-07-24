@@ -8,6 +8,7 @@ import {
 } from "../collaboration.action";
 
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface Props {
   collaborationId: string;
@@ -28,11 +29,11 @@ export default function IncomingRequestActions({
       try {
         await acceptCollaborationRequestAction(collaborationId);
 
-        window.alert("Collaboration request accepted.");
+        toast.success("Collaboration request accepted.");
       } catch (err) {
         setPendingAction(null);
 
-        window.alert("Error accepting collaboration request.");
+        toast.error("Error accepting collaboration request.");
         console.error("handleAcceptRequest failed:", err);
       }
     });
@@ -45,11 +46,11 @@ export default function IncomingRequestActions({
       try {
         await rejectCollaborationRequestAction(collaborationId);
 
-        window.alert("Collaboration request declined.");
+        toast.success("Collaboration request declined.");
       } catch (err) {
         setPendingAction(null);
 
-        window.alert("Error declining collaboration request.");
+        toast.error("Error declining collaboration request.");
         console.error("handleRejectRequest failed:", err);
       }
     });

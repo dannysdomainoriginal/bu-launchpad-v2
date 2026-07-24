@@ -25,9 +25,7 @@ export default function ProductVoteButton({
       try {
         await addVote({ product, userId });
         setHasVoted(true);
-        window.alert("Your vote has been recorded!");
       } catch (err) {
-        window.alert("Error recording your vote");
         console.error("handleAddVote failed:", err);
       }
     });
@@ -38,9 +36,7 @@ export default function ProductVoteButton({
       try {
         await removeVote({ product, userId });
         setHasVoted(false);
-        window.alert("You removed your vote for this innovation");
       } catch (err) {
-        window.alert("Error removing your vote");
         console.error("handleRemoveVote failed:", err);
       }
     });

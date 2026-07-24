@@ -60,8 +60,6 @@ Each authenticated user has access to a dashboard for managing products, feedbac
 | Email          | Resend                         |
 | Deployment     | Vercel                         |
 
----
-
 ## Architecture
 
 The application follows the Next.js App Router architecture and primarily utilizes Server Components. Interactive functionality is implemented through Client Components where required.
