@@ -1,36 +1,108 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BU Launchpad
 
-## Getting Started
+> A platform that enables student founders to showcase their products, collect feedback, connect with collaborators, and manage their projects within a university ecosystem.
 
-First, run the development server:
+## Overview
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+BU Launchpad is a web platform designed for university communities that provides a centralized space for students to publish software products and discover projects being built by other students.
+
+The platform allows founders to present their work, receive structured feedback, manage collaboration requests, and maintain a public builder profile. It also provides visitors with tools to explore products, learn about their creators, and engage with ongoing projects.
+
+The project is currently under active development, with features being released incrementally as the platform evolves.
+
+## Objectives
+
+The primary objectives of BU Launchpad are to:
+
+- Provide a central directory for student-built products.
+- Enable founders to gather feedback from other students.
+- Facilitate collaboration between founders and potential contributors.
+- Increase the visibility of student projects within the university.
+- Provide builders with a dedicated space to manage their products and public profiles.
+
+## Core Features
+
+### Product Management
+
+Authenticated users can create and manage product listings, including project information, branding, links, categories, and development status.
+
+### Product Discovery
+
+Visitors can browse published products, search for projects, and view detailed product pages.
+
+### Feedback System
+
+Visitors can submit structured feedback on published products. Feedback is stored and made available to product owners through their dashboard.
+
+### Collaboration Requests
+
+Users can express interest in contributing to a project by submitting collaboration requests to founders. Product owners can review, accept, or decline requests from the dashboard.
+
+### Builder Profiles
+
+Builders can create optional public profiles containing professional information, biographies, academic details, and external links.
+
+### Dashboard
+
+Each authenticated user has access to a dashboard for managing products, feedback, collaboration requests, and profile information.
+
+## Technology Stack
+
+| Layer          | Technology                     |
+| -------------- | ------------------------------ |
+| Framework      | Next.js (App Router)           |
+| Language       | TypeScript                     |
+| UI             | React, Tailwind CSS, shadcn/ui |
+| Forms          | React Hook Form, Zod           |
+| ORM            | Drizzle ORM                    |
+| Database       | PostgreSQL (Neon)              |
+| Authentication | Clerk                          |
+| Email          | Resend                         |
+| Deployment     | Vercel                         |
+
+---
+
+## Architecture
+
+The application follows the Next.js App Router architecture and primarily utilizes Server Components. Interactive functionality is implemented through Client Components where required.
+
+Key architectural decisions include:
+
+- Server Actions for data mutations.
+- Type-safe validation using Zod.
+- Database access through Drizzle ORM.
+- Modular service layer for business logic.
+- Route-level caching where appropriate.
+- Component-based UI architecture.
+
+## Repository Structure
+
+```
+app/            Application routes
+components/     Shared UI components
+actions/        Server Actions
+services/       Business logic
+db/             Database schema and queries
+lib/            Shared utilities
+types/          Shared TypeScript types
+emails/         Email templates
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Current Release
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Current version: **v2.1**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Major functionality currently available includes:
 
-## Learn More
+- Authentication
+- Product publishing
+- Product discovery
+- Product feedback
+- Collaboration requests
+- Builder profiles
+- Founder dashboard
+- Email notifications
 
-To learn more about Next.js, take a look at the following resources:
+## Future Development
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The platform is under continuous development. Future iterations may introduce additional features, improvements to existing workflows, and expanded functionality based on product requirements and user feedback.
