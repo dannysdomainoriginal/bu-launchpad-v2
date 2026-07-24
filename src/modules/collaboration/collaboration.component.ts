@@ -1,1 +1,0 @@
-export { default as ProductCollaborationRequestBox } from "./components/ProductCollaborationRequestBox";

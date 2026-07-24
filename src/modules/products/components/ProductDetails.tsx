@@ -9,9 +9,9 @@ import { RelativeTime } from "@/components/ui/RelativeTime";
 import { Card } from "@/components/ui/card";
 import { ProductWithTags } from "@/lib/db/schema";
 
-import { ProductVoteButtonWrapper } from "@/modules/votes/votes.component";
-import { ProductFeedbackMessageBox } from "@/modules/feedback/feedback.component";
-import { ProductCollaborationRequestBox } from "@/modules/collaboration/collaboration.component";
+import { ProductVoteButtonWrapper } from "@/modules/votes/components";
+import { ProductFeedbackMessageBox } from "@/modules/feedback/components";
+import { ProductCollaborationRequestBox } from "@/modules/collaboration/components";
 
 type Props = {
   product: ProductWithTags;
@@ -137,7 +137,12 @@ export default function ProductDetails({ product, tags }: Props) {
 
           {/* Feedback Feature */}
           <ProductFeedbackMessageBox productId={product.id} />
-          <ProductCollaborationRequestBox productId={product.id} />
+
+          {/* Collaboration Request Feature */}
+          <ProductCollaborationRequestBox
+            productId={product.id}
+            ownerId={product.authorId}
+          />
         </div>
       </div>
     </div>

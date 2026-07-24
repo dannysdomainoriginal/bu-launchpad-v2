@@ -6,21 +6,29 @@ import { useAuth } from "@clerk/nextjs";
 import CollaborationRequestCard from "./ProductCollaborationRequestCard";
 import { getCollaborationRequestStatus } from "@/modules/collaboration/collaboration.action";
 
+type CollaborationStatus = "pending" | "accepted" | "rejected" | null;
+
 type Props = {
   productId: string;
+  ownerId: string;
 };
 
-export default function ProductCollaborationRequestBox({ productId }: Props) {
+export default function ProductCollaborationRequestBox({
+  productId,
+  ownerId,
+}: Props) {
   const authContext = useAuth();
 
   const [isLoading, setIsLoading] = useState(() => Boolean(authContext.userId));
-  const [hasRequested, setHasRequested] = useState(false);
+
+  const [requestStatus, setRequestStatus] = useState<CollaborationStatus>(null);
+
   const [errorVerifying, setErrorVerifying] = useState(false);
 
   useEffect(() => {
     if (!authContext.userId) {
       setIsLoading(false);
-      setHasRequested(false);
+      setRequestStatus(null);
       setErrorVerifying(false);
 
       return;
@@ -33,10 +41,10 @@ export default function ProductCollaborationRequestBox({ productId }: Props) {
       setErrorVerifying(false);
 
       try {
-        const requested = await getCollaborationRequestStatus(productId);
+        const status = await getCollaborationRequestStatus(productId);
 
         if (isMounted) {
-          setHasRequested(requested);
+          setRequestStatus(status);
         }
       } catch (err) {
         console.error("Error fetching collaboration status:", err);
@@ -61,11 +69,12 @@ export default function ProductCollaborationRequestBox({ productId }: Props) {
   return (
     <CollaborationRequestCard
       productId={productId}
+      ownerId={ownerId}
       isSignedIn={!!authContext.userId}
       isLoading={isLoading}
-      hasRequested={hasRequested}
+      requestStatus={requestStatus}
       errorVerifying={errorVerifying}
-      setHasRequested={setHasRequested}
+      setRequestStatus={setRequestStatus}
     />
   );
 }

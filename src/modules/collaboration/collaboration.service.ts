@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { cacheTag } from "next/cache";
 
 import { db } from "@/lib/db";
@@ -10,9 +10,12 @@ import { productCollaboration, products } from "@/lib/db/schema";
 export async function insertCollaborationRequest(data: {
   id: string;
   productId: string;
-  userId: string;
-  userName: string;
-  userAvatar: string | null;
+  ownerId: string;
+
+  requesterId: string;
+  requesterName: string;
+  requesterAvatar: string | null;
+
   message: string;
 }) {
   const [existing] = await db
@@ -21,7 +24,7 @@ export async function insertCollaborationRequest(data: {
     .where(
       and(
         eq(productCollaboration.productId, data.productId),
-        eq(productCollaboration.userId, data.userId),
+        eq(productCollaboration.requesterId, data.requesterId),
       ),
     )
     .limit(1);
@@ -31,74 +34,143 @@ export async function insertCollaborationRequest(data: {
   }
 
   await db.insert(productCollaboration).values(data);
+
   return true;
 }
 
 /* -------------------------------------------------------------------------- */
-/*                            DELETE COLLAB REQUEST                           */
+/*                         ACCEPT COLLAB REQUEST                              */
 /* -------------------------------------------------------------------------- */
-export async function deleteCollaborationRequestById(requestId: string) {
-  return db
-    .delete(productCollaboration)
+export async function acceptCollaborationRequest(
+  requestId: string,
+  ownerId: string,
+) {
+  await db
+    .update(productCollaboration)
+    .set({
+      status: "accepted",
+      reviewedAt: new Date(),
+      reviewedBy: ownerId,
+      updatedAt: new Date(),
+    })
     .where(eq(productCollaboration.id, requestId));
 }
 
 /* -------------------------------------------------------------------------- */
-/*                         CHECK COLLAB REQUEST STATUS                        */
+/*                         REJECT COLLAB REQUEST                              */
+/* -------------------------------------------------------------------------- */
+export async function rejectCollaborationRequest(
+  requestId: string,
+  ownerId: string,
+) {
+  await db
+    .update(productCollaboration)
+    .set({
+      status: "rejected",
+      reviewedAt: new Date(),
+      reviewedBy: ownerId,
+      updatedAt: new Date(),
+    })
+    .where(eq(productCollaboration.id, requestId));
+}
+
+/* -------------------------------------------------------------------------- */
+/*                      CHECK REQUEST STATUS FOR PRODUCT                        */
 /* -------------------------------------------------------------------------- */
 export async function checkCollaborationRequestStatus(
   productId: string,
-  userId: string,
+  requesterId: string,
 ) {
-  const [existing] = await db
-    .select({ id: productCollaboration.id })
+  const [request] = await db
+    .select({
+      status: productCollaboration.status,
+    })
     .from(productCollaboration)
     .where(
       and(
         eq(productCollaboration.productId, productId),
-        eq(productCollaboration.userId, userId),
+        eq(productCollaboration.requesterId, requesterId),
       ),
     )
     .limit(1);
 
-  return Boolean(existing);
+  return request?.status ?? null;
 }
 
 /* -------------------------------------------------------------------------- */
-/*                      GET COLLAB REQUEST BY PRODUCT ID                      */
+/*                     GET SINGLE COLLAB REQUEST BY ID                        */
 /* -------------------------------------------------------------------------- */
-export async function getProductCollaborationRequests(productId: string) {
-  "use cache";
-  cacheTag("collaborations:list");
-  cacheTag(`collaboration:product:${productId}`);
-
-  return db
+export async function getCollaborationRequestById(requestId: string) {
+  // don't cache it
+  
+  const [request] = await db
     .select()
     .from(productCollaboration)
-    .where(eq(productCollaboration.productId, productId))
+    .where(eq(productCollaboration.id, requestId))
+    .limit(1);
+
+  return request ?? null;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                    GET INCOMING COLLAB REQUESTS                            */
+/* -------------------------------------------------------------------------- */
+export async function getIncomingCollaborationRequests(ownerId: string) {
+  "use cache";
+
+  cacheTag("collaborations:list");
+  cacheTag(`collaborations:owner:${ownerId}`);
+
+  return db
+    .select({
+      id: productCollaboration.id,
+
+      requesterId: productCollaboration.requesterId,
+      requesterName: productCollaboration.requesterName,
+      requesterAvatar: productCollaboration.requesterAvatar,
+
+      productId: productCollaboration.productId,
+      productName: products.name,
+
+      message: productCollaboration.message,
+
+      status: productCollaboration.status,
+
+      createdAt: productCollaboration.createdAt,
+      reviewedAt: productCollaboration.reviewedAt,
+    })
+    .from(productCollaboration)
+    .innerJoin(products, eq(products.id, productCollaboration.productId))
+    .where(eq(productCollaboration.ownerId, ownerId))
     .orderBy(desc(productCollaboration.createdAt));
 }
 
 /* -------------------------------------------------------------------------- */
-/*                       GET COLLAB REQUESTS BY USER ID                       */
+/*                    GET OUTGOING COLLAB REQUESTS                            */
 /* -------------------------------------------------------------------------- */
-export async function getCollaborationsByUserId(userId: string) {
+export async function getOutgoingCollaborationRequests(requesterId: string) {
   "use cache";
-  cacheTag("collaborations:list");
-  cacheTag(`collaborations:user-id:${userId}`);
 
-  return await db
-    .select()
+  cacheTag("collaborations:list");
+  cacheTag(`collaborations:requester:${requesterId}`);
+
+  return db
+    .select({
+      id: productCollaboration.id,
+
+      ownerId: productCollaboration.ownerId,
+      ownerName: products.authorName,
+
+      productId: productCollaboration.productId,
+      productName: products.name,
+
+      status: productCollaboration.status,
+
+      createdAt: productCollaboration.createdAt,
+      reviewedAt: productCollaboration.reviewedAt,
+    })
     .from(productCollaboration)
-    .where(
-      inArray(
-        productCollaboration.productId,
-        db
-          .select({ id: products.id })
-          .from(products)
-          .where(eq(products.authorId, userId)),
-      ),
-    )
-    .orderBy(desc(productCollaboration.createdAt))
-    .limit(20);
+    .innerJoin(products, eq(products.id, productCollaboration.productId))
+    .where(eq(productCollaboration.requesterId, requesterId))
+    .orderBy(desc(productCollaboration.createdAt));
 }

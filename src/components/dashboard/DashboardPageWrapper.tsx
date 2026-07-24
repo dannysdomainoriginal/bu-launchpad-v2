@@ -1,10 +1,15 @@
 import { auth } from "@clerk/nextjs/server";
 
 import DashboardPageClientWrapper from "./DashboardPageClientWrapper";
+
 import DashboardSignInBox from "@/components/dashboard/DashboardSignInBox";
+
 import { getProductsByUserId } from "@/modules/products/products.service";
 import { getFeedbacksByUserId } from "@/modules/feedback/feedback.service";
-import { getCollaborationsByUserId } from "@/modules/collaboration/collaboration.service";
+import {
+  getIncomingCollaborationRequests,
+  getOutgoingCollaborationRequests,
+} from "@/modules/collaboration/collaboration.service";
 import { DashboardTabSchema } from "@/modules/dashboard/dashboard.schema";
 import { getUserDashboardCounts } from "@/modules/dashboard/dashboard.service";
 import { getEventsByUserId } from "@/modules/events/events.service";
@@ -25,13 +30,15 @@ export default async function DashboardPageWrapper({
     userDashboardCounts,
     userInnovations,
     userFeedbacks,
-    userCollaborations,
+    incomingRequests,
+    outgoingRequests,
     userEvents,
   ] = await Promise.all([
     getUserDashboardCounts(authContext.userId),
     getProductsByUserId(authContext.userId, {}),
     getFeedbacksByUserId(authContext.userId),
-    getCollaborationsByUserId(authContext.userId),
+    getIncomingCollaborationRequests(authContext.userId),
+    getOutgoingCollaborationRequests(authContext.userId),
     getEventsByUserId(authContext.userId),
   ]);
 
@@ -41,7 +48,8 @@ export default async function DashboardPageWrapper({
       counts={userDashboardCounts}
       products={userInnovations}
       feedbacks={userFeedbacks}
-      collaborations={userCollaborations}
+      incomingRequests={incomingRequests}
+      outgoingRequests={outgoingRequests}
       events={userEvents}
     />
   );
